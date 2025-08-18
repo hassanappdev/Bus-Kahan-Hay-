@@ -10,10 +10,6 @@
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
 
-        <!-- ✅ GOOGLE MAP API PASTE! -->
-        <meta-data android:name="com.google.android.geo.API_KEY"
-               android:value="AIzaSyAdNBkbVTSVqQg81FhJsAqCE2RXtgipCpI"/>
-
         <activity
             android:name=".MainActivity"
             android:exported="true"
