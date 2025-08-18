@@ -108,8 +108,8 @@ class _HomeState extends State<Home> {
       return;
     }
 
-    const String ACCESS_TOKEN = "pk.0fe15ec580cd466ef8f4070a94b58f16";
-    String baseURL = 'https://api.locationiq.com/v1/autocomplete';
+    const String ACCESS_TOKEN = "";
+    String baseURL = '';
     String request =
         '$baseURL?key=$ACCESS_TOKEN&q=$input&limit=5&countrycodes=pk&format=json';
 
