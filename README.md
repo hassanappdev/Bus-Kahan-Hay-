@@ -1,6 +1,6 @@
 # 🚌 Bus Kahan Hai? – AI-Powered Real-Time Public Transit Assistant for Karachi  
 
-![Bus Kahan Hai Banner](banner.jpg)  
+![Bus Kahan Hai Banner](Bus_Kahan_Hai.jpg)  
 
 **Bus Kahan Hai?** is a smart, AI-powered transit app designed to make Karachi’s local public transport **smarter, efficient, and reliable**.  
 It enables commuters to **track buses in real-time, plan routes, estimate fares, and get arrival alerts** — all from their smartphones.  
