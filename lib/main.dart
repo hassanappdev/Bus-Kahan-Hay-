@@ -1,22 +1,29 @@
-import 'package:bus_kahan_hay/screens/home/home.dart';
+import 'package:bus_kahan_hay/fluid/fluid_home.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
-void main() async {
+void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(const MyApp());
+  // For full screen
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+  SystemChrome.setSystemUIOverlayStyle(
+    SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      systemNavigationBarColor: Colors.transparent,
+    ),
+  );
+
+  runApp(App());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class App extends StatelessWidget {
+  const App({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        title: 'Bus Kahan Hai?',
-        home: Home(),
-      ),
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: FluidHome(title: 'Fluid Splash'),
     );
   }
 }

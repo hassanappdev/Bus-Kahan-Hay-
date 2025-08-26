@@ -454,6 +454,7 @@ class _HomeState extends State<Home> {
     );
   }
 
+  // Drawer
   Widget _buildDrawer() {
     return Drawer(
       child: ListView(
@@ -474,13 +475,6 @@ class _HomeState extends State<Home> {
                   ),
                 ),
                 const SizedBox(height: 8),
-                // Text(
-                //   'Navigation Menu',
-                //   style: TextStyle(
-                //     color: Colors.white.withOpacity(0.8),
-                //     fontSize: 16,
-                //   ),
-                // ),
               ],
             ),
           ),
