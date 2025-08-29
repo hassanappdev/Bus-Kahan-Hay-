@@ -3,12 +3,13 @@ import 'dart:math';
 
 import 'package:flutter/scheduler.dart';
 
-
 class FluidCard extends StatefulWidget {
   final String color;
   final Color altColor;
   final String title;
   final String subtitle;
+  final VoidCallback? onButtonTap;
+  final bool isLastCard;
 
   const FluidCard({
     super.key,
@@ -16,6 +17,8 @@ class FluidCard extends StatefulWidget {
     this.title = "",
     required this.subtitle,
     required this.altColor,
+    this.onButtonTap,
+    this.isLastCard = false,
   });
 
   @override
@@ -102,6 +105,29 @@ class _FluidCardState extends State<FluidCard> {
                 ),
               ),
             ),
+            // Add Get Started button for last card
+            if (widget.isLastCard)
+              Positioned(
+                bottom: 40,
+                child: ElevatedButton(
+                  onPressed: widget.onButtonTap,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: widget.altColor,
+                    padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(25),
+                    ),
+                  ),
+                  child: Text(
+                    'Get Started',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
           ],
         );
       },

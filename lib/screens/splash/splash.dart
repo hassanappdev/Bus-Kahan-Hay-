@@ -1,7 +1,7 @@
-import 'package:bus_kahan_hay/screens/home/home.dart';
+import 'package:bus_kahan_hay/screens/onBoardingFluid/fluid_home.dart';
+
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'location_permission_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({Key? key}) : super(key: key);
@@ -22,22 +22,26 @@ class _SplashScreenState extends State<SplashScreen> {
 
     try {
       final prefs = await SharedPreferences.getInstance();
-      final isLocationAllowed = prefs.getBool('locationAllowed') ?? false;
+      final hasSeenOnboarding = prefs.getBool('hasSeenOnboarding') ?? false;
 
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => isLocationAllowed
-              ? const Home()
-              : const LocationPermissionScreen(),
-        ),
-      );
+      if (!hasSeenOnboarding) {
+        // First time - show onboarding
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => FluidHome(title: 'Fluid Splash'),
+          ),
+        );
+      } else {
+        // Already seen onboarding - go to appropriate screen
+        Navigator.pushNamed(context, '/home');
+      }
     } catch (e) {
-      // If any error occurs, default to permission screen
+      // If any error occurs, default to onboarding
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => const LocationPermissionScreen(),
+          builder: (context) => FluidHome(title: 'Fluid Splash'),
         ),
       );
     }

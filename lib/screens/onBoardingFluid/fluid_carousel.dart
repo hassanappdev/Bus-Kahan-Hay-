@@ -1,13 +1,20 @@
-import 'package:bus_kahan_hay/fluid/components.dart';
-import 'package:bus_kahan_hay/fluid/fluid_clipper.dart';
-import 'package:bus_kahan_hay/fluid/fluid_edge.dart';
+import 'package:bus_kahan_hay/screens/onBoardingFluid/components.dart';
+import 'package:bus_kahan_hay/screens/onBoardingFluid/fluid_clipper.dart';
+import 'package:bus_kahan_hay/screens/onBoardingFluid/fluid_edge.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
 class FluidCarousel extends StatefulWidget {
   final List<Widget> children;
+  final VoidCallback? onLastPageReached;
+  final PageController? pageController;
 
-  const FluidCarousel({super.key, required this.children});
+  const FluidCarousel({
+    super.key, 
+    required this.children,
+    this.onLastPageReached,
+    this.pageController,
+  });
 
   @override
   FluidCarouselState createState() => FluidCarouselState();
@@ -76,6 +83,10 @@ class FluidCarouselState extends State<FluidCarousel> with SingleTickerProviderS
   void _handlePanDown(DragDownDetails details, Size size) {
     if (_dragIndex != null && _dragCompleted) {
       _index = _dragIndex!;
+      // Check if we reached the last page
+      if (_index >= widget.children.length - 1 && widget.onLastPageReached != null) {
+        widget.onLastPageReached!();
+      }
     }
     _dragIndex = null;
     _dragOffset = details.localPosition;

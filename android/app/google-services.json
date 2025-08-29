@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "561369727802",
+    "project_id": "buskahanhay",
+    "storage_bucket": "buskahanhay.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:561369727802:android:8ab42400fb89470ee74603",
+        "android_client_info": {
+          "package_name": "com.example.bus_kahan_hay"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "561369727802-2fq924ibol1v7dmbepfrcbejkbtksekf.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.bus_kahan_hay",
+            "certificate_hash": "d3f9e8e667084451e1488ab45df0cc56c69bd7bc"
+          }
+        },
+        {
+          "client_id": "561369727802-r4acq094rldo0l7ti978lgc2cmdlco47.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA5WTtRPHHmuIJ-1xfdmbH42AYOSXLr7ic"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "561369727802-r4acq094rldo0l7ti978lgc2cmdlco47.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "561369727802-0v3mlj633tveno000ng27cg9ffr6hmag.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.busKahanHay"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
