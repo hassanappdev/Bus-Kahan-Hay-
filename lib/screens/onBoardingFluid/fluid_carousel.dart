@@ -86,8 +86,8 @@ class FluidCarouselState extends State<FluidCarousel> with SingleTickerProviderS
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: _index == dotIndex 
-                    ? AppColors.red 
-                    : Colors.white.withOpacity(0.5),
+                    ? Colors.white.withOpacity(0.0)
+                        : Colors.white.withOpacity(0.0),
                 ),
               );
             }),
@@ -158,3 +158,5 @@ class FluidCarouselState extends State<FluidCarousel> with SingleTickerProviderS
     edge.applyTouchOffset();
   }
 }
+
+
