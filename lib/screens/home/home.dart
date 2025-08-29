@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:bus_kahan_hay/model/bus_routes.dart';
+import 'package:bus_kahan_hay/screens/drawer/custom_drawer.dart';
 import 'package:bus_kahan_hay/screens/drawer/guide_screen.dart';
 import 'package:bus_kahan_hay/screens/drawer/help_screen.dart';
 import 'package:bus_kahan_hay/screens/home/route_screen.dart';
@@ -217,7 +218,7 @@ class _HomeState extends State<Home> {
             onPressed: () => _scaffoldKey.currentState?.openDrawer(),
           ),
         ),
-        drawer: _buildDrawer(),
+        drawer: CustomDrawer(),
         body: Stack(
           children: [
             SingleChildScrollView(
@@ -455,89 +456,7 @@ class _HomeState extends State<Home> {
   }
 
   // Drawer
-  Widget _buildDrawer() {
-    return Drawer(
-      child: ListView(
-        padding: EdgeInsets.zero,
-        children: [
-          DrawerHeader(
-            decoration: BoxDecoration(color: primaryColor),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Text(
-                  'Bus Kahan Hay',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 8),
-              ],
-            ),
-          ),
-          ListTile(
-            leading: Icon(Icons.directions_bus, color: darkColor),
-            title: Text('Find Route', style: TextStyle(color: darkColor)),
-            onTap: () {
-              Navigator.pop(context);
-            },
-          ),
-          ListTile(
-            leading: Icon(Icons.map, color: darkColor),
-            title: Text('View Routes', style: TextStyle(color: darkColor)),
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => ViewRoutesScreen(routes: _routes),
-                ),
-              );
-            },
-          ),
-          ListTile(
-            leading: Icon(Icons.help_outline, color: darkColor),
-            title: Text('Guide', style: TextStyle(color: darkColor)),
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const GuideScreen()),
-              );
-            },
-          ),
-          ListTile(
-            leading: Icon(Icons.help, color: darkColor),
-            title: Text('Help', style: TextStyle(color: darkColor)),
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const HelpScreen()),
-              );
-            },
-          ),
-          const Divider(),
-          ListTile(
-            leading: Icon(Icons.info, color: darkColor),
-            title: Text('About', style: TextStyle(color: darkColor)),
-            onTap: () {
-              Navigator.pop(context);
-              showAboutDialog(
-                context: context,
-                applicationName: 'Bus Kahan Hay',
-                applicationVersion: '1.0.0',
-                children: [Text('Public transport route finder app')],
-              );
-            },
-          ),
-        ],
-      ),
-    );
-  }
+ 
 
   Widget _buildSuggestionsList(
     List<dynamic> suggestions,

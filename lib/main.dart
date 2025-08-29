@@ -3,7 +3,12 @@ import 'package:bus_kahan_hay/screens/authentication/forgot_password.dart';
 import 'package:bus_kahan_hay/screens/authentication/login.dart';
 import 'package:bus_kahan_hay/screens/authentication/select_profile_picture_screen.dart';
 import 'package:bus_kahan_hay/screens/authentication/signup.dart';
+import 'package:bus_kahan_hay/screens/drawer/guide_screen.dart';
+import 'package:bus_kahan_hay/screens/drawer/help_screen.dart';
+import 'package:bus_kahan_hay/screens/drawer/profile_section.dart';
+import 'package:bus_kahan_hay/screens/drawer/view_routes_screen.dart';
 import 'package:bus_kahan_hay/screens/home/home.dart';
+import 'package:bus_kahan_hay/screens/onBoardingFluid/fluid_home.dart';
 import 'package:bus_kahan_hay/screens/splash/splash.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -11,18 +16,22 @@ import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 
 void main() async {
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  // ✅ Initialize binding FIRST
   WidgetsFlutterBinding.ensureInitialized();
-  // For full screen
+
+  // ✅ Initialize Firebase AFTER binding is ready
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  // ✅ Set system UI styles after initialization
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   SystemChrome.setSystemUIOverlayStyle(
-    SystemUiOverlayStyle(
+    const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
       systemNavigationBarColor: Colors.transparent,
     ),
   );
 
-  runApp(App());
+  runApp(const App());
 }
 
 class App extends StatelessWidget {
@@ -32,10 +41,15 @@ class App extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      // initialRoute: '/splash-screen',
-      home: SplashScreen(),
+      home: const FluidHome(),
       routes: {
-        // AUTHENTICATION - 2
+        '/onboarding': (context) => const FluidHome(),
+        '/my-profile': (context) => const ProfileSection(),
+        '/ViewRoutesScreen': (context) => const ViewRoutesScreen(routes: []),
+
+        '/HelpScreen': (context) => const HelpScreen(),
+        '/GuideScreen': (context) => const GuideScreen(),
+
         '/home': (context) => const Home(),
         '/auth': (context) => const Auth(),
         '/forgot-password': (context) => const ForgotPassword(),
@@ -43,8 +57,6 @@ class App extends StatelessWidget {
         '/select-profile-picture-screen': (context) =>
             const SelectProfilePictureScreen(),
         '/signup': (context) => const Signup(),
-
-        // SPLASH SCREEN
         '/splash-screen': (context) => const SplashScreen(),
       },
     );

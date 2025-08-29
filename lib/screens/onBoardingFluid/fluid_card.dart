@@ -1,166 +1,127 @@
+import 'package:bus_kahan_hay/core/app_colors.dart';
 import 'package:flutter/material.dart';
-import 'dart:math';
 
-import 'package:flutter/scheduler.dart';
-
-class FluidCard extends StatefulWidget {
-  final String color;
-  final Color altColor;
+class FluidCard extends StatelessWidget {
   final String title;
   final String subtitle;
+  final String illustration;
   final VoidCallback? onButtonTap;
   final bool isLastCard;
+  final Color backgroundColor;
+  final int index;
 
   const FluidCard({
     super.key,
-    required this.color,
-    this.title = "",
+    required this.title,
     required this.subtitle,
-    required this.altColor,
+    required this.illustration,
+    required this.backgroundColor,
     this.onButtonTap,
     this.isLastCard = false,
+    required this.index,
   });
 
   @override
-  State<FluidCard> createState() => _FluidCardState();
-}
-
-class _FluidCardState extends State<FluidCard> {
-  late Ticker _ticker;
-
-  @override
-  void initState() {
-    _ticker = Ticker((d) {
-      setState(() {});
-    })..start();
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    _ticker.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (_, constraints) {
-        var time = DateTime.now().millisecondsSinceEpoch / 2000;
-        var scaleX = 1.2 + sin(time) * .05;
-        var scaleY = 1.2 + cos(time) * .07;
-        var offsetY = 20 + cos(time) * 20;
-        final width = constraints.maxWidth;
-        final height = constraints.maxHeight;
-        return Stack(
-          alignment: Alignment.center,
-          fit: StackFit.expand,
-          children: <Widget>[
-            Transform.translate(
-              offset: Offset(
-                -(scaleX - 1) / 2 * width,
-                -(scaleY - 1) / 2 * height + offsetY,
-              ),
-              child: Transform(
-                transform: Matrix4.diagonal3Values(scaleX, scaleY, 1),
-                child: Image.asset(
-                  'assets/images/Bg-${widget.color}.png',
-                  fit: BoxFit.cover,
-                ),
+    // Different background colors for each card to show animation
+    final List<Color> cardColors = [
+      AppColors.green,
+      Color(0xFF1E8449), // Darker green
+      Color(0xFF2ECC71), // Lighter green
+    ];
+
+    return Container(
+      color: cardColors[index],
+      child: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Illustration
+            Expanded(
+              flex: 3,
+              child: Image.asset(
+                illustration,
+                fit: BoxFit.contain,
+                width: 250,
+                height: 250,
               ),
             ),
-            Container(
-              alignment: Alignment.center,
-              child: Padding(
-                padding: const EdgeInsets.only(top: 75.0, bottom: 25.0),
-                child: Column(
-                  children: <Widget>[
-                    //Top Image
-                    Expanded(
-                      flex: 3,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                        child: Image.asset(
-                          'assets/images/Illustration-${widget.color}.png',
-                          fit: BoxFit.contain,
-                        ),
-                      ),
-                    ),
 
-                    //Slider circles
-                    SizedBox(
-                      height: 14,
-                      child: Image.asset('assets/images/Slider-${widget.color}.png'),
-                    ),
+            const SizedBox(height: 30),
 
-                    //Bottom content
-                    Expanded(
-                      flex: 2,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 18.0),
-                        child: _buildBottomContent(),
-                      ),
-                    ),
-                  ],
-                ),
+            // Title
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+                height: 1.3,
               ),
             ),
-            // Add Get Started button for last card
-            if (widget.isLastCard)
-              Positioned(
-                bottom: 40,
+
+            const SizedBox(height: 15),
+
+            // Subtitle
+            Text(
+              subtitle,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.white.withOpacity(0.9),
+              ),
+            ),
+
+            const SizedBox(height: 30),
+
+            // Page indicator
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(3, (dotIndex) {
+                return Container(
+                  width: 10,
+                  height: 10,
+                  margin: const EdgeInsets.symmetric(horizontal: 6),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: index == dotIndex
+                        ? AppColors.red
+                        : Colors.white.withOpacity(0.1),
+                  ),
+                );
+              }),
+            ),
+
+            const Spacer(),
+
+            // Get Started Button for last card
+            if (isLastCard)
+              SizedBox(
+                width: double.infinity,
+                height: 50,
                 child: ElevatedButton(
-                  onPressed: widget.onButtonTap,
+                  onPressed: onButtonTap,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: widget.altColor,
-                    padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                    backgroundColor: AppColors.red,
+                    foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(25),
                     ),
+                    elevation: 4,
                   ),
-                  child: Text(
+                  child: const Text(
                     'Get Started',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                 ),
               ),
-          ],
-        );
-      },
-    );
-  }
 
-  Widget _buildBottomContent() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: <Widget>[
-        Text(
-          widget.title,
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            height: 1.2,
-            fontSize: 30.0,
-            fontFamily: 'MarcellusSC',
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
+            const SizedBox(height: 40),
+          ],
         ),
-        Text(
-          widget.subtitle,
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: 14.0,
-            fontWeight: FontWeight.w300,
-            fontFamily: 'Lexend',
-            color: Colors.white.withValues(alpha: 0.7),
-          ),
-        ),
-      ],
+      ),
     );
   }
 }

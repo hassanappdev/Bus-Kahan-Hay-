@@ -1,3 +1,4 @@
+import 'package:bus_kahan_hay/core/app_colors.dart';
 import 'package:bus_kahan_hay/model/bus_routes.dart';
 import 'package:flutter/material.dart';
 
@@ -113,6 +114,8 @@ class _ViewRoutesScreenState extends State<ViewRoutesScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+
     // 🔎 Filter routes by search
     final filteredRoutes = routeDetails.entries.where((entry) {
       final query = _searchQuery.toLowerCase();
@@ -124,174 +127,246 @@ class _ViewRoutesScreenState extends State<ViewRoutesScreen> {
           terminals.contains(query);
     }).toList();
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'All Bus Routes',
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-            fontSize: 20,
-          ),
-        ),
-        centerTitle: true,
-        iconTheme: const IconThemeData(color: Colors.white),
-        backgroundColor: primaryColor,
-        elevation: 0,
-      ),
-      body: Container(
-        color: lightColor,
-        child: Column(
+    return SafeArea(
+      child: Scaffold(
+        backgroundColor: AppColors.green,
+        body: Column(
           children: [
-            // 🔎 Search field
-            Padding(
-              padding: const EdgeInsets.all(12),
-              child: TextField(
-                controller: _searchController,
-                onChanged: (value) {
-                  setState(() => _searchQuery = value);
-                },
-                decoration: InputDecoration(
-                  hintText: "Search routes or stops...",
-                  prefixIcon: Icon(Icons.search, color: primaryColor),
-                  filled: true,
-                  fillColor: Colors.white,
-                  contentPadding: const EdgeInsets.symmetric(
-                    vertical: 0,
-                    horizontal: 16,
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(30),
-                    borderSide: BorderSide(
-                      color: primaryColor.withOpacity(0.3),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-
-            // Header with route count
+            // Header Section
             Container(
-              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-              color: primaryColor.withOpacity(0.1),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+              width: double.infinity,
               child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Icon(Icons.info_outline, color: primaryColor, size: 20),
-                  const SizedBox(width: 8),
-                  Text(
-                    '${filteredRoutes.length} routes found',
+                  IconButton(
+                    icon: const Icon(Icons.arrow_back),
+                    color: Colors.white,
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                  const Text(
+                    'All Bus Routes',
                     style: TextStyle(
-                      color: darkColor,
-                      fontWeight: FontWeight.w500,
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
+                  const SizedBox(width: 48), // Balance the row
                 ],
               ),
             ),
 
-            // Routes list
+            // Content Section
             Expanded(
-              child: filteredRoutes.isEmpty
-                  ? const Center(
-                      child: Text(
-                        "No routes found",
-                        style: TextStyle(fontSize: 16),
+              child: Container(
+                width: width,
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(30),
+                    topRight: Radius.circular(30),
+                  ),
+                ),
+                child: Column(
+                  children: [
+                    // 🔎 Search field
+                    Padding(
+                      padding: const EdgeInsets.all(20.0),
+                      child: TextField(
+                        controller: _searchController,
+                        onChanged: (value) {
+                          setState(() => _searchQuery = value);
+                        },
+                        decoration: InputDecoration(
+                          hintText: "Search routes or stops...",
+                          prefixIcon: Icon(
+                            Icons.search,
+                            color: AppColors.green,
+                          ),
+                          filled: true,
+                          fillColor: Colors.grey[100],
+                          contentPadding: const EdgeInsets.symmetric(
+                            vertical: 15,
+                            horizontal: 20,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(15),
+                            borderSide: BorderSide.none,
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(15),
+                            borderSide: BorderSide.none,
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(15),
+                            borderSide: BorderSide(
+                              color: AppColors.green,
+                              width: 2,
+                            ),
+                          ),
+                        ),
                       ),
-                    )
-                  : ListView.builder(
-                      padding: const EdgeInsets.symmetric(vertical: 8),
-                      itemCount: filteredRoutes.length,
-                      itemBuilder: (context, index) {
-                        final entry = filteredRoutes[index];
-                        final routeName = entry.key;
-                        final details = entry.value;
+                    ),
 
-                        return ExpansionTile(
-                          tilePadding: const EdgeInsets.symmetric(
-                            horizontal: 16,
+                    // Header with route count
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 12,
+                        horizontal: 20,
+                      ),
+                      width: double.infinity,
+                      color: AppColors.green.withOpacity(0.1),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.info_outline,
+                            color: AppColors.green,
+                            size: 20,
                           ),
-                          leading: Container(
-                            width: 40,
-                            height: 40,
-                            decoration: BoxDecoration(
-                              color: primaryColor.withOpacity(0.1),
-                              shape: BoxShape.circle,
-                            ),
-                            child: Icon(
-                              Icons.directions_bus,
-                              color: primaryColor,
-                              size: 24,
-                            ),
-                          ),
-                          title: Text(
-                            routeName,
+                          const SizedBox(width: 8),
+                          Text(
+                            '${filteredRoutes.length} routes found',
                             style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: darkColor,
-                              fontSize: 16,
+                              color: Colors.grey[700],
+                              fontWeight: FontWeight.w500,
                             ),
                           ),
-                          subtitle: Text(
-                            '${details['length']} • ${details['terminals']}',
-                            style: TextStyle(
-                              color: darkColor.withOpacity(0.6),
-                              fontSize: 14,
-                            ),
-                          ),
-                          trailing: Icon(
-                            Icons.expand_more,
-                            color: secondaryColor,
-                          ),
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(16),
-                              margin: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(8),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: darkColor.withOpacity(0.05),
-                                    blurRadius: 4,
-                                    offset: const Offset(0, 2),
-                                  ),
-                                ],
-                              ),
+                        ],
+                      ),
+                    ),
+
+                    // Routes list
+                    Expanded(
+                      child: filteredRoutes.isEmpty
+                          ? Center(
                               child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  _buildDetailRow(
-                                    'Route Length:',
-                                    details['length'] ?? 'N/A',
+                                  Icon(
+                                    Icons.search_off,
+                                    size: 60,
+                                    color: Colors.grey[400],
                                   ),
-                                  const SizedBox(height: 8),
-                                  _buildDetailRow(
-                                    'Terminals:',
-                                    details['terminals'] ?? 'N/A',
-                                  ),
-                                  const SizedBox(height: 8),
-                                  _buildDetailRow(
-                                    'Stops:',
-                                    '',
-                                    isMultiLine: true,
-                                  ),
+                                  const SizedBox(height: 16),
                                   Text(
-                                    details['stops'] ?? 'N/A',
+                                    "No routes found",
                                     style: TextStyle(
-                                      color: darkColor.withOpacity(0.7),
-                                      fontSize: 14,
+                                      fontSize: 16,
+                                      color: Colors.grey[600],
                                     ),
                                   ),
                                 ],
                               ),
+                            )
+                          : ListView.builder(
+                              padding: const EdgeInsets.all(20.0),
+                              itemCount: filteredRoutes.length,
+                              itemBuilder: (context, index) {
+                                final entry = filteredRoutes[index];
+                                final routeName = entry.key;
+                                final details = entry.value;
+
+                                return Container(
+                                  margin: const EdgeInsets.only(bottom: 16),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(15),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.grey.withOpacity(0.1),
+                                        blurRadius: 10,
+                                        offset: const Offset(0, 2),
+                                      ),
+                                    ],
+                                  ),
+                                  child: ExpansionTile(
+                                    tilePadding: const EdgeInsets.symmetric(
+                                      horizontal: 20,
+                                      vertical: 8,
+                                    ),
+                                    leading: Container(
+                                      width: 40,
+                                      height: 40,
+                                      decoration: BoxDecoration(
+                                        color: AppColors.green.withOpacity(0.1),
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: Icon(
+                                        Icons.directions_bus,
+                                        color: AppColors.green,
+                                        size: 24,
+                                      ),
+                                    ),
+                                    title: Text(
+                                      routeName,
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                    subtitle: Text(
+                                      '${details['length']} • ${details['terminals']}',
+                                      style: TextStyle(
+                                        color: Colors.grey[600],
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                    trailing: Icon(
+                                      Icons.expand_more,
+                                      color: AppColors.green,
+                                    ),
+                                    children: [
+                                      Container(
+                                        padding: const EdgeInsets.all(20),
+                                        decoration: BoxDecoration(
+                                          color: Colors.grey[50],
+                                          borderRadius: const BorderRadius.only(
+                                            bottomLeft: Radius.circular(15),
+                                            bottomRight: Radius.circular(15),
+                                          ),
+                                        ),
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            _buildDetailRow(
+                                              'Route Length:',
+                                              details['length'] ?? 'N/A',
+                                            ),
+                                            const SizedBox(height: 12),
+                                            _buildDetailRow(
+                                              'Terminals:',
+                                              details['terminals'] ?? 'N/A',
+                                            ),
+                                            const SizedBox(height: 12),
+                                            const Text(
+                                              'Stops:',
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 14,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 8),
+                                            Text(
+                                              details['stops'] ?? 'N/A',
+                                              style: TextStyle(
+                                                color: Colors.grey[700],
+                                                fontSize: 14,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
                             ),
-                            const SizedBox(height: 8),
-                          ],
-                        );
-                      },
                     ),
+                  ],
+                ),
+              ),
             ),
           ],
         ),
@@ -299,23 +374,21 @@ class _ViewRoutesScreenState extends State<ViewRoutesScreen> {
     );
   }
 
-  Widget _buildDetailRow(
-    String label,
-    String value, {
-    bool isMultiLine = false,
-  }) {
+  Widget _buildDetailRow(String label, String value) {
     return Row(
-      crossAxisAlignment: isMultiLine
-          ? CrossAxisAlignment.start
-          : CrossAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
           style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
         ),
         const SizedBox(width: 8),
-        if (!isMultiLine)
-          Expanded(child: Text(value, style: const TextStyle(fontSize: 14))),
+        Expanded(
+          child: Text(
+            value,
+            style: TextStyle(color: Colors.grey[700], fontSize: 14),
+          ),
+        ),
       ],
     );
   }

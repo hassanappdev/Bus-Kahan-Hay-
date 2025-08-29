@@ -1,4 +1,4 @@
-import 'package:bus_kahan_hay/screens/onBoardingFluid/components.dart';
+import 'package:bus_kahan_hay/core/app_colors.dart';
 import 'package:bus_kahan_hay/screens/onBoardingFluid/fluid_clipper.dart';
 import 'package:bus_kahan_hay/screens/onBoardingFluid/fluid_edge.dart';
 import 'package:flutter/material.dart';
@@ -7,13 +7,11 @@ import 'package:flutter/scheduler.dart';
 class FluidCarousel extends StatefulWidget {
   final List<Widget> children;
   final VoidCallback? onLastPageReached;
-  final PageController? pageController;
 
   const FluidCarousel({
     super.key, 
     required this.children,
     this.onLastPageReached,
-    this.pageController,
   });
 
   @override
@@ -52,27 +50,51 @@ class FluidCarouselState extends State<FluidCarousel> with SingleTickerProviderS
   Widget build(BuildContext context) {
     int l = widget.children.length;
 
-    return GestureDetector(
-        key: key,
-        onPanDown: (details) => _handlePanDown(details, _getSize()),
-        onPanUpdate: (details) => _handlePanUpdate(details, _getSize()),
-        onPanEnd: (details) => _handlePanEnd(details, _getSize()),
-        child: Stack(
-          children: <Widget>[
-            widget.children[_index % l],
-            _dragIndex == null
-                ? SizedBox()
-                : ClipPath(
-              clipBehavior: Clip.hardEdge,
-              clipper: FluidClipper(edge, margin: 10.0),
-              child: widget.children[_dragIndex! % l],
-            ),
-            SunAndMoon(
-              index: _dragIndex ?? 0,
-              isDragComplete: _dragCompleted,
-            )
-          ],
-        ));
+    return Stack(
+      children: [
+        GestureDetector(
+          key: key,
+          onPanDown: (details) => _handlePanDown(details, _getSize()),
+          onPanUpdate: (details) => _handlePanUpdate(details, _getSize()),
+          onPanEnd: (details) => _handlePanEnd(details, _getSize()),
+          child: Stack(
+            children: <Widget>[
+              widget.children[_index % l],
+              _dragIndex == null
+                  ? SizedBox()
+                  : ClipPath(
+                      clipBehavior: Clip.hardEdge,
+                      clipper: FluidClipper(edge, margin: 10.0),
+                      child: widget.children[_dragIndex! % l],
+                    ),
+            ],
+          ),
+        ),
+        
+        // Current page indicator at top
+        Positioned(
+          top: 30,
+          left: 0,
+          right: 0,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: List.generate(l, (dotIndex) {
+              return Container(
+                width: 8,
+                height: 8,
+                margin: const EdgeInsets.symmetric(horizontal: 4),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: _index == dotIndex 
+                    ? AppColors.red 
+                    : Colors.white.withOpacity(0.5),
+                ),
+              );
+            }),
+          ),
+        ),
+      ],
+    );
   }
 
   Size _getSize() {
@@ -83,7 +105,6 @@ class FluidCarouselState extends State<FluidCarousel> with SingleTickerProviderS
   void _handlePanDown(DragDownDetails details, Size size) {
     if (_dragIndex != null && _dragCompleted) {
       _index = _dragIndex!;
-      // Check if we reached the last page
       if (_index >= widget.children.length - 1 && widget.onLastPageReached != null) {
         widget.onLastPageReached!();
       }
@@ -101,44 +122,27 @@ class FluidCarouselState extends State<FluidCarousel> with SingleTickerProviderS
   void _handlePanUpdate(DragUpdateDetails details, Size size) {
     double dx = details.localPosition.dx - _dragOffset.dx;
 
-    if (!_isSwipeActive(dx)) {
-      return;
-    }
-    if (_isSwipeComplete(dx, size.width)) {
-      return;
-    }
+    if (!_isSwipeActive(dx)) return;
+    if (_isSwipeComplete(dx, size.width)) return;
 
-    if (_dragDirection == -1) {
-      dx = size.width + dx;
-    }
+    if (_dragDirection == -1) dx = size.width + dx;
     edge.applyTouchOffset(Offset(dx, details.localPosition.dy), size);
   }
 
   bool _isSwipeActive(double dx) {
-    // check if a swipe is just starting:
     if (_dragDirection == 0.0 && dx.abs() > 20.0) {
       _dragDirection = dx.sign;
       edge.side = _dragDirection == 1.0 ? Side.left : Side.right;
-      setState(() {
-        _dragIndex = _index - _dragDirection.toInt();
-      });
+      setState(() => _dragIndex = _index - _dragDirection.toInt());
     }
     return _dragDirection != 0.0;
   }
 
   bool _isSwipeComplete(double dx, double width) {
-    if (_dragDirection == 0.0) {
-      return false;
-    } // not started
-    if (_dragCompleted) {
-      return true;
-    } // already done
+    if (_dragDirection == 0.0) return false;
+    if (_dragCompleted) return true;
 
-    // check if swipe is just completed:
-    double availW = _dragOffset.dx;
-    if (_dragDirection == 1) {
-      availW = width - availW;
-    }
+    double availW = _dragDirection == 1 ? width - _dragOffset.dx : _dragOffset.dx;
     double ratio = dx * _dragDirection / availW;
 
     if (ratio > 0.8 && availW / width > 0.5) {
@@ -150,7 +154,6 @@ class FluidCarouselState extends State<FluidCarousel> with SingleTickerProviderS
     return _dragCompleted;
   }
 
-  // gesture ko khatam krny k liye
   void _handlePanEnd(DragEndDetails details, Size size) {
     edge.applyTouchOffset();
   }

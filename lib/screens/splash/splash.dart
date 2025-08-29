@@ -1,5 +1,5 @@
 import 'package:bus_kahan_hay/screens/onBoardingFluid/fluid_home.dart';
-
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -14,34 +14,42 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    _navigateToNextScreen();
+    _handleSplashNavigation();
   }
 
-  Future<void> _navigateToNextScreen() async {
-    await Future.delayed(const Duration(seconds: 3)); // 3 seconds splash
+  Future<void> _handleSplashNavigation() async {
+    await Future.delayed(
+      const Duration(seconds: 3),
+    ); // Show splash for 3 seconds
 
     try {
       final prefs = await SharedPreferences.getInstance();
       final hasSeenOnboarding = prefs.getBool('hasSeenOnboarding') ?? false;
+      final user = FirebaseAuth.instance.currentUser;
 
       if (!hasSeenOnboarding) {
-        // First time - show onboarding
+        // ✅ First time user → show onboarding first
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => FluidHome(title: 'Fluid Splash'),
+            builder: (context) => FluidHome(),
           ),
         );
       } else {
-        // Already seen onboarding - go to appropriate screen
-        Navigator.pushNamed(context, '/home');
+        if (user == null) {
+          // ✅ Already seen onboarding but NOT logged in → go to auth
+          Navigator.pushReplacementNamed(context, '/auth');
+        } else {
+          // ✅ Already logged in → go to home
+          Navigator.pushReplacementNamed(context, '/home');
+        }
       }
     } catch (e) {
-      // If any error occurs, default to onboarding
+      // ❌ If anything fails → restart onboarding → auth flow
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => FluidHome(title: 'Fluid Splash'),
+          builder: (context) => FluidHome(),
         ),
       );
     }
