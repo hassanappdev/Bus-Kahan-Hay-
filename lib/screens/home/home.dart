@@ -1,8 +1,8 @@
 import 'dart:convert';
+import 'package:bus_kahan_hay/core/app_colors.dart';
 import 'package:bus_kahan_hay/model/bus_routes.dart';
 import 'package:bus_kahan_hay/screens/drawer/custom_drawer.dart';
 import 'package:bus_kahan_hay/screens/drawer/guide_screen.dart';
-import 'package:bus_kahan_hay/screens/drawer/help_screen.dart';
 import 'package:bus_kahan_hay/screens/home/route_screen.dart';
 import 'package:bus_kahan_hay/screens/drawer/view_routes_screen.dart';
 import 'package:bus_kahan_hay/services/kml_parser.dart';
@@ -37,11 +37,6 @@ class _HomeState extends State<Home> {
   bool _showCurrentLocationSuggestions = false;
   bool _showDestinationSuggestions = false;
   List<BusRoute> _routes = [];
-
-  // Color Theme
-  final Color primaryColor = const Color(0xFFEC130F); // Red
-  final Color secondaryColor = const Color(0xFF009B37); // Green
-  final Color darkColor = const Color(0xFF000000); // Black
 
   @override
   void initState() {
@@ -109,8 +104,8 @@ class _HomeState extends State<Home> {
       return;
     }
 
-    const String ACCESS_TOKEN = "";
-    String baseURL = '';
+    const String ACCESS_TOKEN = "pk.0fe15ec580cd466ef8f4070a94b58f16";
+    String baseURL = 'https://api.locationiq.com/v1/autocomplete';
     String request =
         '$baseURL?key=$ACCESS_TOKEN&q=$input&limit=5&countrycodes=pk&format=json';
 
@@ -202,74 +197,113 @@ class _HomeState extends State<Home> {
   }
 
   @override
+  @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        key: _scaffoldKey,
-        appBar: AppBar(
-          title: const Text(
-            'Bus Kahan Hay',
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-          ),
-          centerTitle: true,
-          backgroundColor: primaryColor,
-          leading: IconButton(
-            icon: const Icon(Icons.menu, color: Colors.white),
-            onPressed: () => _scaffoldKey.currentState?.openDrawer(),
+    return Scaffold(
+      key: _scaffoldKey,
+      appBar: AppBar(
+        title: Text(
+          'Bus Kahan Hay',
+          style: TextStyle(
+            color: AppColors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
           ),
         ),
-        drawer: CustomDrawer(),
-        body: Stack(
+        centerTitle: true,
+        backgroundColor: AppColors.green,
+        leading: IconButton(
+          icon: Icon(Icons.menu, color: AppColors.white),
+          onPressed: () => _scaffoldKey.currentState?.openDrawer(),
+        ),
+      ),
+      drawer: CustomDrawer(),
+      body: SafeArea(
+        child: Stack(
           children: [
             SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Header Section
                   Text(
-                    'Plan your journey',
+                    'Plan Your Journey',
                     style: TextStyle(
-                      fontSize: 24,
+                      fontSize: 28,
                       fontWeight: FontWeight.bold,
-                      color: darkColor,
+                      color: AppColors.black,
+                      height: 1.2,
                     ),
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Find the best bus route for your trip',
+                    'Find the best bus route for your trip across the city',
                     style: TextStyle(
                       fontSize: 16,
-                      color: darkColor.withOpacity(0.7),
+                      color: AppColors.black.withOpacity(0.7),
+                      fontWeight: FontWeight.w400,
                     ),
                   ),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 40),
+
+                  // Input Card
                   Card(
-                    elevation: 4,
+                    elevation: 6,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(16),
                     ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: AppColors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: AppColors.containerColor,
+                          width: 1,
+                        ),
+                      ),
+                      padding: const EdgeInsets.all(24),
                       child: Column(
                         children: [
+                          // Current Location Input
                           TextField(
                             controller: _currentLocationController,
                             focusNode: _currentLocationFocus,
                             decoration: InputDecoration(
-                              labelText: 'Current location',
+                              labelText: 'Current Location',
                               hintText: 'Enter your starting point',
-                              labelStyle: TextStyle(color: darkColor),
+                              labelStyle: TextStyle(
+                                color: AppColors.black,
+                                fontWeight: FontWeight.w500,
+                              ),
+                              hintStyle: TextStyle(
+                                color: AppColors.black.withOpacity(0.5),
+                              ),
                               border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8),
-                                borderSide: BorderSide(color: darkColor),
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide(
+                                  color: AppColors.containerColor,
+                                ),
                               ),
                               focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8),
-                                borderSide: BorderSide(color: primaryColor),
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide(
+                                  color: AppColors.green,
+                                  width: 2,
+                                ),
                               ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide(
+                                  color: AppColors.containerColor,
+                                ),
+                              ),
+                              filled: true,
+                              fillColor: AppColors.containerColor,
                               prefixIcon: Icon(
                                 Icons.location_on,
-                                color: primaryColor,
+                                color: AppColors.green,
+                                size: 24,
                               ),
                               suffixIcon: Row(
                                 mainAxisSize: MainAxisSize.min,
@@ -278,7 +312,11 @@ class _HomeState extends State<Home> {
                                       .text
                                       .isNotEmpty)
                                     IconButton(
-                                      icon: const Icon(Icons.clear, size: 20),
+                                      icon: Icon(
+                                        Icons.clear,
+                                        size: 20,
+                                        color: AppColors.black.withOpacity(0.6),
+                                      ),
                                       onPressed: () {
                                         _currentLocationController.clear();
                                         setState(() {
@@ -286,43 +324,81 @@ class _HomeState extends State<Home> {
                                         });
                                       },
                                     ),
+                                  const SizedBox(width: 4),
                                   IconButton(
-                                    icon: const Icon(
+                                    icon: Icon(
                                       Icons.my_location,
                                       size: 20,
+                                      color: AppColors.green,
                                     ),
                                     onPressed: _getCurrentLocation,
                                   ),
+                                  const SizedBox(width: 8),
                                 ],
+                              ),
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 14,
                               ),
                             ),
                           ),
+
                           if (_showCurrentLocationSuggestions &&
                               _currentLocationSuggestions.isNotEmpty)
                             _buildSuggestionsList(
                               _currentLocationSuggestions,
                               true,
                             ),
-                          const SizedBox(height: 16),
+
+                          const SizedBox(height: 20),
+
+                          // Destination Input
                           TextField(
                             controller: _destinationController,
                             focusNode: _destinationFocus,
                             decoration: InputDecoration(
                               labelText: 'Destination',
                               hintText: 'Where do you want to go?',
-                              labelStyle: TextStyle(color: darkColor),
+                              labelStyle: TextStyle(
+                                color: AppColors.black,
+                                fontWeight: FontWeight.w500,
+                              ),
+                              hintStyle: TextStyle(
+                                color: AppColors.black.withOpacity(0.5),
+                              ),
                               border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8),
-                                borderSide: BorderSide(color: darkColor),
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide(
+                                  color: AppColors.containerColor,
+                                ),
                               ),
                               focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8),
-                                borderSide: BorderSide(color: primaryColor),
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide(
+                                  color: AppColors.green,
+                                  width: 2,
+                                ),
                               ),
-                              prefixIcon: Icon(Icons.flag, color: primaryColor),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide(
+                                  color: AppColors.containerColor,
+                                ),
+                              ),
+                              filled: true,
+                              fillColor: AppColors.containerColor,
+                              prefixIcon: Icon(
+                                Icons.flag,
+                                color: AppColors.green,
+                                size: 24,
+                              ),
                               suffixIcon: _destinationController.text.isNotEmpty
                                   ? IconButton(
-                                      icon: const Icon(Icons.clear, size: 20),
+                                      icon: Icon(
+                                        Icons.clear,
+                                        size: 20,
+                                        color: AppColors.black.withOpacity(0.6),
+                                      ),
                                       onPressed: () {
                                         _destinationController.clear();
                                         setState(() {
@@ -331,17 +407,26 @@ class _HomeState extends State<Home> {
                                       },
                                     )
                                   : null,
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 14,
+                              ),
                             ),
                           ),
+
                           if (_showDestinationSuggestions &&
                               _destinationSuggestions.isNotEmpty)
                             _buildSuggestionsList(
                               _destinationSuggestions,
                               false,
                             ),
-                          const SizedBox(height: 24),
+
+                          const SizedBox(height: 32),
+
+                          // Find Route Button
                           SizedBox(
                             width: double.infinity,
+                            height: 56,
                             child: ElevatedButton(
                               onPressed: _routes.isEmpty
                                   ? null
@@ -353,10 +438,11 @@ class _HomeState extends State<Home> {
                                         ScaffoldMessenger.of(
                                           context,
                                         ).showSnackBar(
-                                          const SnackBar(
+                                          SnackBar(
                                             content: Text(
                                               'Please enter both locations',
                                             ),
+                                            backgroundColor: AppColors.green,
                                           ),
                                         );
                                         return;
@@ -381,6 +467,7 @@ class _HomeState extends State<Home> {
                                           );
                                         }
 
+                                        // Use the simple version first for testing
                                         Navigator.push(
                                           context,
                                           MaterialPageRoute(
@@ -410,6 +497,7 @@ class _HomeState extends State<Home> {
                                             content: Text(
                                               'Error: ${e.toString()}',
                                             ),
+                                            backgroundColor: AppColors.green,
                                           ),
                                         );
                                       } finally {
@@ -417,36 +505,98 @@ class _HomeState extends State<Home> {
                                       }
                                     },
                               style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.green,
+                                foregroundColor: AppColors.white,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                elevation: 4,
                                 padding: const EdgeInsets.symmetric(
                                   vertical: 16,
                                 ),
-                                backgroundColor: primaryColor,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                elevation: 4,
-                              ),
-                              child: const Text(
-                                'Find Bus Route',
-                                style: TextStyle(
-                                  fontSize: 16,
+                                textStyle: const TextStyle(
+                                  fontSize: 18,
                                   fontWeight: FontWeight.bold,
-                                  color: Colors.white,
                                 ),
                               ),
+                              child: const Text('Find Bus Route'),
+                            ),
+                          ),
+
+                          const SizedBox(height: 16),
+
+                          // Additional Info Text
+                          Text(
+                            'We\'ll find the most efficient bus routes for your journey',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: AppColors.black.withOpacity(0.6),
+                              fontSize: 14,
                             ),
                           ),
                         ],
                       ),
                     ),
                   ),
+
+                  const SizedBox(height: 32),
+
+                  // Quick Actions Section
+                  Text(
+                    'Quick Actions',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.black,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildQuickActionCard(
+                          icon: Icons.route,
+                          title: 'View All Routes',
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    ViewRoutesScreen(routes: _routes),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: _buildQuickActionCard(
+                          icon: Icons.help,
+                          title: 'Help Guide',
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const GuideScreen(),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
                 ],
               ),
             ),
+
             if (_isLoading)
-              Center(
-                child: CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
+              Container(
+                color: Colors.black.withOpacity(0.4),
+                child: Center(
+                  child: CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(AppColors.green),
+                    strokeWidth: 3,
+                  ),
                 ),
               ),
           ],
@@ -455,8 +605,39 @@ class _HomeState extends State<Home> {
     );
   }
 
-  // Drawer
- 
+  Widget _buildQuickActionCard({
+    required IconData icon,
+    required String title,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: AppColors.containerColor,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: AppColors.containerColor.withOpacity(0.5)),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 32, color: AppColors.green),
+            const SizedBox(height: 8),
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: AppColors.black,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
   Widget _buildSuggestionsList(
     List<dynamic> suggestions,
@@ -465,15 +646,16 @@ class _HomeState extends State<Home> {
     return Container(
       margin: const EdgeInsets.only(top: 8),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: darkColor.withOpacity(0.1),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
+            color: AppColors.black.withOpacity(0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
           ),
         ],
+        border: Border.all(color: AppColors.containerColor),
       ),
       child: ListView.builder(
         shrinkWrap: true,
@@ -484,13 +666,22 @@ class _HomeState extends State<Home> {
           return ListTile(
             leading: Icon(
               isCurrentLocation ? Icons.location_on : Icons.place,
-              color: primaryColor,
+              color: AppColors.green,
+              size: 22,
             ),
             title: Text(
               place["display_name"] ?? 'Unknown location',
-              style: TextStyle(fontSize: 14, color: darkColor),
+              style: TextStyle(
+                fontSize: 14,
+                color: AppColors.black,
+                fontWeight: FontWeight.w400,
+              ),
             ),
             dense: true,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 8,
+            ),
             onTap: () => _onSuggestionTap(place, isCurrentLocation),
           );
         },

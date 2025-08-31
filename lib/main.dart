@@ -15,21 +15,55 @@ import 'package:flutter/services.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 
+import 'package:flutter/foundation.dart';
+
 void main() async {
   // ✅ Initialize binding FIRST
   WidgetsFlutterBinding.ensureInitialized();
 
+  // ✅ Add global error handling
+  FlutterError.onError = (FlutterErrorDetails details) {
+    FlutterError.presentError(details);
+    if (kDebugMode) {
+      print("FLUTTER ERROR: ${details.exception}");
+      print("STACK TRACE: ${details.stack}");
+    }
+  };
+
+  // ✅ Handle platform errors
+  PlatformDispatcher.instance.onError = (error, stack) {
+    if (kDebugMode) {
+      print("PLATFORM ERROR: $error");
+      print("PLATFORM STACK: $stack");
+    }
+    return true;
+  };
+
   // ✅ Initialize Firebase AFTER binding is ready
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  } catch (e) {
+    if (kDebugMode) {
+      print("FIREBASE INIT ERROR: $e");
+    }
+  }
 
   // ✅ Set system UI styles after initialization
-  SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-  SystemChrome.setSystemUIOverlayStyle(
-    const SystemUiOverlayStyle(
-      statusBarColor: Colors.transparent,
-      systemNavigationBarColor: Colors.transparent,
-    ),
-  );
+  try {
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    SystemChrome.setSystemUIOverlayStyle(
+      const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        systemNavigationBarColor: Colors.transparent,
+      ),
+    );
+  } catch (e) {
+    if (kDebugMode) {
+      print("SYSTEM UI ERROR: $e");
+    }
+  }
 
   runApp(const App());
 }
@@ -41,7 +75,10 @@ class App extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: const FluidHome(),
+
+      // home: const FluidHome(),
+      home: const Home(),
+
       routes: {
         '/onboarding': (context) => const FluidHome(),
         '/my-profile': (context) => const ProfileSection(),

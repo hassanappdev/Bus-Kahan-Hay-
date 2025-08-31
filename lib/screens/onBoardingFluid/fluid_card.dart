@@ -87,8 +87,8 @@ class FluidCard extends StatelessWidget {
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     color: index == dotIndex
-                        ? AppColors.red
-                        : Colors.white.withOpacity(0.1),
+                        ? AppColors.white.withOpacity(1.0)
+                        : Colors.white.withOpacity(0.5),
                   ),
                 );
               }),

@@ -1,4 +1,3 @@
-import 'package:bus_kahan_hay/core/app_colors.dart';
 import 'package:bus_kahan_hay/screens/onBoardingFluid/fluid_clipper.dart';
 import 'package:bus_kahan_hay/screens/onBoardingFluid/fluid_edge.dart';
 import 'package:flutter/material.dart';
