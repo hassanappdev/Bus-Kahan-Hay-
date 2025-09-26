@@ -104,8 +104,8 @@ class FluidCard extends StatelessWidget {
                 child: ElevatedButton(
                   onPressed: onButtonTap,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.red,
-                    foregroundColor: Colors.white,
+                    backgroundColor: AppColors.white,
+                    foregroundColor: Colors.green,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(25),
                     ),

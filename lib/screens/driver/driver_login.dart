@@ -1,29 +1,28 @@
 import 'package:bus_kahan_hay/core/app_colors.dart';
-import 'package:bus_kahan_hay/data/local/user_local_data.dart';
+import 'package:bus_kahan_hay/data/local/driver_local_data.dart';
 import 'package:bus_kahan_hay/screens/authentication/toast_msg.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-class Signup extends StatefulWidget {
-  const Signup({super.key});
+class DriverLogin extends StatefulWidget {
+  const DriverLogin({super.key});
 
   @override
-  State<Signup> createState() => _SignupState();
+  State<DriverLogin> createState() => _DriverLoginState();
 }
 
-class _SignupState extends State<Signup> {
+class _DriverLoginState extends State<DriverLogin> {
   final _formKey = GlobalKey<FormState>();
-  final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _busRegController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
-  // Create Firebase Collection
-  final users = FirebaseFirestore.instance.collection('users');
+  // Bus Reg Number Regex
+  final RegExp busRegExp = RegExp(r'^JB-46\d{2}$');
 
-  // 💨 SignUp / Register Authentication Function
   bool loader = false;
-  Future<void> regUser() async {
+
+  Future<void> loginDriver() async {
     if (!_formKey.currentState!.validate()) return;
 
     setState(() {
@@ -31,76 +30,82 @@ class _SignupState extends State<Signup> {
     });
 
     try {
-      // 1. Create user in Firebase Auth
-      final credential = await FirebaseAuth.instance
-          .createUserWithEmailAndPassword(
-            email: _emailController.text.trim(),
-            password: _passwordController.text,
-          );
+      // Convert bus reg number to email format
+      String driverEmail = "${_busRegController.text.trim()}@bus.com";
 
-      // 2. Save user details to Firestore with UID as doc ID
-      final uid = credential.user!.uid;
+      // Sign in with Firebase Auth
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: driverEmail,
+        password: _passwordController.text,
+      );
 
-      // ADD USER DATA TO THE FIRESTORE DATABASE COLLECTION
-      await users.doc(uid).set({
-        "name": _nameController.text,
-        "email": _emailController.text.trim(),
-        "password": _passwordController.text.trim(),
-        "role": "user", // Default role as requested
-      });
+      final user = FirebaseAuth.instance.currentUser;
 
-      ToastMsg.showToastMsg('Registration Successful');
+      if (user != null) {
+        // Check if user exists in drivers collection
+        final driverDoc = await FirebaseFirestore.instance
+            .collection("drivers")
+            .doc(user.uid)
+            .get();
 
+        if (driverDoc.exists) {
+          final driverData = driverDoc.data()!;
+          final role = driverData['role'];
+          final name = driverData['name'] ?? '';
+          final busRegNumber = driverData['busRegNumber'] ?? '';
+          final route = driverData['route'] ?? '';
+
+          if (role == "driver") {
+            // ✅ Save to SharedPreferences
+            DriverLocalData.saveDriverData(
+              name: name,
+              busRegNumber: busRegNumber,
+              route: route,
+            );
+
+            ToastMsg.showToastMsg('Driver login successful');
+
+            // Update driver as active
+            await FirebaseFirestore.instance
+                .collection("drivers")
+                .doc(user.uid)
+                .update({
+                  "isActive": true,
+                  "lastUpdated": FieldValue.serverTimestamp(),
+                });
+
+            Navigator.pushReplacementNamed(context, '/driver-home');
+          } else {
+            ToastMsg.showToastMsg('Access denied. Not a driver account.');
+            await FirebaseAuth.instance.signOut();
+          }
+        } else {
+          ToastMsg.showToastMsg('Driver account not found.');
+          await FirebaseAuth.instance.signOut();
+        }
+      }
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'user-not-found') {
+        ToastMsg.showToastMsg(
+          'No driver found with this bus registration number.',
+        );
+      } else if (e.code == 'wrong-password') {
+        ToastMsg.showToastMsg('Wrong password provided.');
+      } else {
+        ToastMsg.showToastMsg('Login failed: ${e.message}');
+      }
+    } catch (e) {
+      ToastMsg.showToastMsg('Unexpected error: $e');
+    } finally {
       setState(() {
         loader = false;
       });
-
-      // SAVE USER INFORMATION in SHARED PREFERENCES FOR DRAWER
-      UserLocalData.saveUserData(
-        name: _nameController.text.trim(),
-        email: _emailController.text.trim(),
-      );
-
-      // Short delay just to show toast
-      await Future.delayed(Duration(seconds: 1));
-
-      Navigator.pushNamed(context, '/select-profile-picture-screen');
-    } on FirebaseAuthException catch (e) {
-      if (e.code == 'weak-password') {
-        ToastMsg.showToastMsg('The password provided is too weak');
-      } else if (e.code == 'email-already-in-use') {
-        ToastMsg.showToastMsg(
-          'Account already exists. Redirecting to login...',
-        );
-
-        // ✅ STOP loader immediately before delay
-        setState(() {
-          loader = false;
-        });
-
-        await Future.delayed(Duration(seconds: 3));
-        Navigator.pushNamed(context, '/login');
-        return; // stop further execution
-      } else {
-        ToastMsg.showToastMsg('Registration failed: ${e.message}');
-      }
-    } catch (e) {
-      print('Error: $e');
-      ToastMsg.showToastMsg('Something went wrong. Please try again.');
-    } finally {
-      // ✅ Only stop loader if it hasn't already been stopped
-      if (loader) {
-        setState(() {
-          loader = false;
-        });
-      }
     }
   }
 
   @override
   void dispose() {
-    _nameController.dispose();
-    _emailController.dispose();
+    _busRegController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
@@ -127,14 +132,14 @@ class _SignupState extends State<Signup> {
                     onPressed: () => Navigator.pop(context),
                   ),
                   const Text(
-                    'Sign Up',
+                    'Driver Login',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(width: 48), // Balance the row
+                  const SizedBox(width: 48),
                 ],
               ),
             ),
@@ -159,7 +164,7 @@ class _SignupState extends State<Signup> {
                       children: [
                         const SizedBox(height: 20),
                         const Text(
-                          'Create an Account',
+                          'Driver Login',
                           style: TextStyle(
                             fontSize: 22,
                             fontWeight: FontWeight.bold,
@@ -167,57 +172,32 @@ class _SignupState extends State<Signup> {
                         ),
                         const SizedBox(height: 10),
                         const Text(
-                          'Sign up to get started',
+                          'Login to your driver account',
                           style: TextStyle(fontSize: 16, color: Colors.grey),
                         ),
                         const SizedBox(height: 30),
 
-                        // Name Field
+                        // Bus Reg Number Field
                         TextFormField(
-                          controller: _nameController,
+                          controller: _busRegController,
                           decoration: InputDecoration(
-                            labelText: 'Full Name',
+                            labelText: 'Bus Registration Number',
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(10),
                             ),
-                            prefixIcon: const Icon(Icons.person),
+                            prefixIcon: const Icon(Icons.directions_bus),
                             contentPadding: const EdgeInsets.symmetric(
                               vertical: 15,
                               horizontal: 15,
                             ),
+                            hintText: 'JB-4682',
                           ),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
-                              return 'Please enter your name';
+                              return 'Please enter bus registration number';
                             }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 20),
-
-                        // Email Field
-                        TextFormField(
-                          controller: _emailController,
-                          keyboardType: TextInputType.emailAddress,
-                          decoration: InputDecoration(
-                            labelText: 'Email',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            prefixIcon: const Icon(Icons.email),
-                            contentPadding: const EdgeInsets.symmetric(
-                              vertical: 15,
-                              horizontal: 15,
-                            ),
-                          ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter your email';
-                            }
-                            if (!RegExp(
-                              r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
-                            ).hasMatch(value)) {
-                              return 'Please enter a valid email';
+                            if (!busRegExp.hasMatch(value)) {
+                              return 'Format must be JB-4682 (e.g., JB-4682)';
                             }
                             return null;
                           },
@@ -241,7 +221,7 @@ class _SignupState extends State<Signup> {
                           ),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
-                              return 'Please enter a password';
+                              return 'Please enter your password';
                             }
                             if (value.length < 6) {
                               return 'Password must be at least 6 characters';
@@ -249,9 +229,25 @@ class _SignupState extends State<Signup> {
                             return null;
                           },
                         ),
-                        const SizedBox(height: 30),
+                        const SizedBox(height: 10),
 
-                        // Sign Up Button
+                        // Forgot Password
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: TextButton(
+                            onPressed: () {
+                              // Navigate to driver forgot password screen
+                              // Navigator.pushNamed(context, '/driver-forgot-password');
+                            },
+                            child: Text(
+                              'Forgot Password?',
+                              style: TextStyle(color: AppColors.green),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+
+                        // Login Button
                         SizedBox(
                           width: double.infinity,
                           height: 50,
@@ -262,14 +258,14 @@ class _SignupState extends State<Signup> {
                                 borderRadius: BorderRadius.circular(10),
                               ),
                             ),
-                            onPressed: regUser,
+                            onPressed: loginDriver,
                             child: Center(
                               child: loader
-                                  ? CircularProgressIndicator(
+                                  ? const CircularProgressIndicator(
                                       color: Colors.white,
                                     )
-                                  : Text(
-                                      'Sign Up',
+                                  : const Text(
+                                      'Driver Login',
                                       style: TextStyle(
                                         color: Colors.white,
                                         fontSize: 18,
@@ -280,45 +276,17 @@ class _SignupState extends State<Signup> {
                         ),
                         const SizedBox(height: 30),
 
-                        // Or divider
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Divider(
-                                color: Colors.grey[300],
-                                thickness: 1,
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                              ),
-                              child: Text(
-                                'OR',
-                                style: TextStyle(color: Colors.grey[600]),
-                              ),
-                            ),
-                            Expanded(
-                              child: Divider(
-                                color: Colors.grey[300],
-                                thickness: 1,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 30),
-
-                        // Login redirect
+                        // Sign up redirect
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const Text('Already have an account?'),
+                            const Text("Don't have a driver account?"),
                             TextButton(
                               onPressed: () {
-                                Navigator.pushNamed(context, '/login');
+                                Navigator.pushNamed(context, '/driver-signup');
                               },
                               child: Text(
-                                'Login',
+                                'Driver Sign Up',
                                 style: TextStyle(
                                   color: AppColors.green,
                                   fontWeight: FontWeight.bold,

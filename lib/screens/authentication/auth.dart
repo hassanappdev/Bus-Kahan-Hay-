@@ -91,10 +91,10 @@ class Auth extends StatelessWidget {
                           elevation: 3,
                         ),
                         onPressed: () {
-                          Navigator.pushNamed(context, '/login');
+                          Navigator.pushNamed(context, '/signup');
                         },
                         child: const Text(
-                          'Log In',
+                          'User Sign Up',
                           style: TextStyle(
                             fontFamily: 'LeagueSpartan',
                             fontWeight: FontWeight.w500,
@@ -124,10 +124,10 @@ class Auth extends StatelessWidget {
                           elevation: 3,
                         ),
                         onPressed: () {
-                          Navigator.pushNamed(context, '/signup');
+                          Navigator.pushNamed(context, '/driver-signup');
                         },
                         child: const Text(
-                          'Sign Up',
+                          'Driver Sign Up',
                           style: TextStyle(
                             fontFamily: 'LeagueSpartan',
                             fontWeight: FontWeight.w500,
