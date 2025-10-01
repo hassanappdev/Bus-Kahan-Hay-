@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:bus_kahan_hay/core/app_colors.dart';
-import 'package:bus_kahan_hay/screens/authentication/toast_msg.dart';
+import 'package:bus_kahan_hay/screens/user/authentication/toast_msg.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';

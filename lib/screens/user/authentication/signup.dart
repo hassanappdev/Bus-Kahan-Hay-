@@ -1,29 +1,30 @@
 import 'package:bus_kahan_hay/core/app_colors.dart';
-import 'package:bus_kahan_hay/data/local/driver_local_data.dart';
+import 'package:bus_kahan_hay/data/local/user_local_data.dart';
 import 'package:bus_kahan_hay/screens/user/authentication/toast_msg.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-class DriverLogin extends StatefulWidget {
-  const DriverLogin({super.key});
+class Signup extends StatefulWidget {
+  const Signup({super.key});
 
   @override
-  State<DriverLogin> createState() => _DriverLoginState();
+  State<Signup> createState() => _SignupState();
 }
 
-class _DriverLoginState extends State<DriverLogin> {
+class _SignupState extends State<Signup> {
   final _formKey = GlobalKey<FormState>();
-  final TextEditingController _busRegController = TextEditingController();
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _obscurePassword = true;
 
-  // Bus Reg Number Regex
-  final RegExp busRegExp = RegExp(r'^JB-46\d{2}$');
+  // Create Firebase Collection
+  final users = FirebaseFirestore.instance.collection('users');
 
+  // 💨 SignUp / Register Authentication Function
   bool loader = false;
-
-  Future<void> loginDriver() async {
+  Future<void> regUser() async {
     if (!_formKey.currentState!.validate()) return;
 
     setState(() {
@@ -31,82 +32,76 @@ class _DriverLoginState extends State<DriverLogin> {
     });
 
     try {
-      // Convert bus reg number to email format
-      String driverEmail = "${_busRegController.text.trim()}@bus.com";
+      // 1. Create user in Firebase Auth
+      final credential = await FirebaseAuth.instance
+          .createUserWithEmailAndPassword(
+            email: _emailController.text.trim(),
+            password: _passwordController.text,
+          );
 
-      // Sign in with Firebase Auth
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: driverEmail,
-        password: _passwordController.text,
-      );
+      // 2. Save user details to Firestore with UID as doc ID
+      final uid = credential.user!.uid;
 
-      final user = FirebaseAuth.instance.currentUser;
+      // ADD USER DATA TO THE FIRESTORE DATABASE COLLECTION
+      await users.doc(uid).set({
+        "name": _nameController.text,
+        "email": _emailController.text.trim(),
+        "password": _passwordController.text.trim(),
+        "role": "user", // Default role as requested
+      });
 
-      if (user != null) {
-        // Check if user exists in drivers collection
-        final driverDoc = await FirebaseFirestore.instance
-            .collection("drivers")
-            .doc(user.uid)
-            .get();
+      ToastMsg.showToastMsg('Registration Successful');
 
-        if (driverDoc.exists) {
-          final driverData = driverDoc.data()!;
-          final role = driverData['role'];
-          final name = driverData['name'] ?? '';
-          final busRegNumber = driverData['busRegNumber'] ?? '';
-          final route = driverData['route'] ?? '';
-
-          if (role == "driver") {
-            // ✅ Save to SharedPreferences
-            DriverLocalData.saveDriverData(
-              name: name,
-              busRegNumber: busRegNumber,
-              route: route,
-            );
-
-            ToastMsg.showToastMsg('Driver login successful');
-
-            // Update driver as active
-            await FirebaseFirestore.instance
-                .collection("drivers")
-                .doc(user.uid)
-                .update({
-                  "isActive": true,
-                  "lastUpdated": FieldValue.serverTimestamp(),
-                });
-
-            Navigator.pushReplacementNamed(context, '/driver-home');
-          } else {
-            ToastMsg.showToastMsg('Access denied. Not a driver account.');
-            await FirebaseAuth.instance.signOut();
-          }
-        } else {
-          ToastMsg.showToastMsg('Driver account not found.');
-          await FirebaseAuth.instance.signOut();
-        }
-      }
-    } on FirebaseAuthException catch (e) {
-      if (e.code == 'user-not-found') {
-        ToastMsg.showToastMsg(
-          'No driver found with this bus registration number.',
-        );
-      } else if (e.code == 'wrong-password') {
-        ToastMsg.showToastMsg('Wrong password provided.');
-      } else {
-        ToastMsg.showToastMsg('Login failed: ${e.message}');
-      }
-    } catch (e) {
-      ToastMsg.showToastMsg('Unexpected error: $e');
-    } finally {
       setState(() {
         loader = false;
       });
+
+      // SAVE USER INFORMATION in SHARED PREFERENCES FOR DRAWER
+      UserLocalData.saveUserData(
+        name: _nameController.text.trim(),
+        email: _emailController.text.trim(),
+      );
+
+      // Short delay just to show toast
+      await Future.delayed(Duration(seconds: 1));
+
+      Navigator.pushNamed(context, '/select-profile-picture-screen');
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'weak-password') {
+        ToastMsg.showToastMsg('The password provided is too weak');
+      } else if (e.code == 'email-already-in-use') {
+        ToastMsg.showToastMsg(
+          'Account already exists. Redirecting to login...',
+        );
+
+        // ✅ STOP loader immediately before delay
+        setState(() {
+          loader = false;
+        });
+
+        await Future.delayed(Duration(seconds: 3));
+        Navigator.pushNamed(context, '/login');
+        return; // stop further execution
+      } else {
+        ToastMsg.showToastMsg('Registration failed: ${e.message}');
+      }
+    } catch (e) {
+      print('Error: $e');
+      ToastMsg.showToastMsg('Something went wrong. Please try again.');
+    } finally {
+      // ✅ Only stop loader if it hasn't already been stopped
+      if (loader) {
+        setState(() {
+          loader = false;
+        });
+      }
     }
   }
 
   @override
   void dispose() {
-    _busRegController.dispose();
+    _nameController.dispose();
+    _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
@@ -208,7 +203,7 @@ class _DriverLoginState extends State<DriverLogin> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Driver Login',
+                              'Create Account',
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 24,
@@ -218,7 +213,7 @@ class _DriverLoginState extends State<DriverLogin> {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              'Access your driver dashboard',
+                              'Join thousands of commuters',
                               style: TextStyle(
                                 color: Colors.white.withOpacity(0.9),
                                 fontSize: 14,
@@ -248,7 +243,7 @@ class _DriverLoginState extends State<DriverLogin> {
 
                             // Welcome Text
                             Text(
-                              'Welcome Back!',
+                              'Welcome!',
                               style: TextStyle(
                                 fontSize: 28,
                                 fontWeight: FontWeight.w800,
@@ -258,7 +253,7 @@ class _DriverLoginState extends State<DriverLogin> {
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              'Sign in to access your driver account',
+                              'Create your account to get started',
                               style: TextStyle(
                                 fontSize: 16,
                                 color: Colors.grey[700],
@@ -268,9 +263,9 @@ class _DriverLoginState extends State<DriverLogin> {
                             ),
                             const SizedBox(height: 40),
 
-                            // Bus Registration Number Field
+                            // Name Field
                             Text(
-                              'Bus Registration Number',
+                              'Full Name',
                               style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w600,
@@ -279,10 +274,10 @@ class _DriverLoginState extends State<DriverLogin> {
                             ),
                             const SizedBox(height: 8),
                             TextFormField(
-                              controller: _busRegController,
+                              controller: _nameController,
                               style: TextStyle(fontSize: 16),
                               decoration: InputDecoration(
-                                hintText: 'JB-4600',
+                                hintText: 'Enter your full name',
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(12),
                                   borderSide: BorderSide(
@@ -303,7 +298,7 @@ class _DriverLoginState extends State<DriverLogin> {
                                   ),
                                 ),
                                 prefixIcon: Icon(
-                                  Icons.directions_bus_rounded,
+                                  Icons.person_outline_rounded,
                                   color: Colors.grey[600],
                                 ),
                                 contentPadding: const EdgeInsets.symmetric(
@@ -313,10 +308,65 @@ class _DriverLoginState extends State<DriverLogin> {
                               ),
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
-                                  return 'Please enter bus registration number';
+                                  return 'Please enter your name';
                                 }
-                                if (!busRegExp.hasMatch(value)) {
-                                  return 'Format must be JB-46XX (e.g., JB-4600, JB-4615)';
+                                return null;
+                              },
+                            ),
+                            const SizedBox(height: 24),
+
+                            // Email Field
+                            Text(
+                              'Email Address',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.grey[800],
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            TextFormField(
+                              controller: _emailController,
+                              keyboardType: TextInputType.emailAddress,
+                              style: TextStyle(fontSize: 16),
+                              decoration: InputDecoration(
+                                hintText: 'Enter your email',
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(
+                                    color: Colors.grey[300]!,
+                                  ),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(
+                                    color: AppColors.green,
+                                    width: 2,
+                                  ),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(
+                                    color: Colors.grey[300]!,
+                                  ),
+                                ),
+                                prefixIcon: Icon(
+                                  Icons.email_outlined,
+                                  color: Colors.grey[600],
+                                ),
+                                contentPadding: const EdgeInsets.symmetric(
+                                  vertical: 16,
+                                  horizontal: 16,
+                                ),
+                              ),
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please enter your email';
+                                }
+                                if (!RegExp(
+                                  r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                                ).hasMatch(value)) {
+                                  return 'Please enter a valid email';
                                 }
                                 return null;
                               },
@@ -338,7 +388,7 @@ class _DriverLoginState extends State<DriverLogin> {
                               obscureText: _obscurePassword,
                               style: TextStyle(fontSize: 16),
                               decoration: InputDecoration(
-                                hintText: 'Enter your password',
+                                hintText: 'Create a strong password',
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(12),
                                   borderSide: BorderSide(
@@ -382,7 +432,7 @@ class _DriverLoginState extends State<DriverLogin> {
                               ),
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
-                                  return 'Please enter your password';
+                                  return 'Please enter a password';
                                 }
                                 if (value.length < 6) {
                                   return 'Password must be at least 6 characters';
@@ -390,34 +440,9 @@ class _DriverLoginState extends State<DriverLogin> {
                                 return null;
                               },
                             ),
-                            const SizedBox(height: 16),
+                            const SizedBox(height: 40),
 
-                            // // Forgot Password
-                            // Align(
-                            //   alignment: Alignment.centerRight,
-                            //   child: TextButton(
-                            //     onPressed: () {
-                            //       // Navigate to driver forgot password screen
-                            //       // Navigator.pushNamed(context, '/driver-forgot-password');
-                            //     },
-                            //     style: TextButton.styleFrom(
-                            //       padding: EdgeInsets.zero,
-                            //       tapTargetSize:
-                            //           MaterialTapTargetSize.shrinkWrap,
-                            //     ),
-                            //     child: Text(
-                            //       'Forgot Password?',
-                            //       style: TextStyle(
-                            //         color: AppColors.green,
-                            //         fontWeight: FontWeight.w600,
-                            //         fontSize: 14,
-                            //       ),
-                            //     ),
-                            //   ),
-                            // ),
-                            const SizedBox(height: 32),
-
-                            // Login Button
+                            // Sign Up Button
                             Container(
                               width: double.infinity,
                               height: 56,
@@ -440,7 +465,7 @@ class _DriverLoginState extends State<DriverLogin> {
                                   ),
                                   elevation: 0,
                                 ),
-                                onPressed: loginDriver,
+                                onPressed: regUser,
                                 child: loader
                                     ? SizedBox(
                                         width: 20,
@@ -450,24 +475,13 @@ class _DriverLoginState extends State<DriverLogin> {
                                           color: Colors.white,
                                         ),
                                       )
-                                    : Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          Icon(
-                                            Icons.directions_bus_rounded,
-                                            size: 24,
-                                          ),
-                                          SizedBox(width: 12),
-                                          Text(
-                                            'Driver Login',
-                                            style: TextStyle(
-                                              fontSize: 18,
-                                              fontWeight: FontWeight.w600,
-                                              letterSpacing: 0.3,
-                                            ),
-                                          ),
-                                        ],
+                                    : Text(
+                                        'Create Account',
+                                        style: TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.w600,
+                                          letterSpacing: 0.3,
+                                        ),
                                       ),
                               ),
                             ),
@@ -484,7 +498,7 @@ class _DriverLoginState extends State<DriverLogin> {
                                     horizontal: 16,
                                   ),
                                   child: Text(
-                                    'New Driver?',
+                                    'Already have an account?',
                                     style: TextStyle(
                                       color: Colors.grey[600],
                                       fontSize: 14,
@@ -498,7 +512,7 @@ class _DriverLoginState extends State<DriverLogin> {
                             ),
                             const SizedBox(height: 24),
 
-                            // Sign Up Button
+                            // Login Button
                             Container(
                               width: double.infinity,
                               height: 56,
@@ -519,13 +533,10 @@ class _DriverLoginState extends State<DriverLogin> {
                                   elevation: 0,
                                 ),
                                 onPressed: () {
-                                  Navigator.pushNamed(
-                                    context,
-                                    '/driver-signup',
-                                  );
+                                  Navigator.pushNamed(context, '/login');
                                 },
                                 child: Text(
-                                  'Create Driver Account',
+                                  'Sign In Instead',
                                   style: TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.w600,

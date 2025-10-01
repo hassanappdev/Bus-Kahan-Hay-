@@ -1,6 +1,6 @@
 import 'package:bus_kahan_hay/core/app_colors.dart';
 import 'package:bus_kahan_hay/data/local/driver_local_data.dart';
-import 'package:bus_kahan_hay/screens/authentication/toast_msg.dart';
+import 'package:bus_kahan_hay/screens/user/authentication/toast_msg.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -19,6 +19,7 @@ class _DriverSignupState extends State<DriverSignup> {
   final TextEditingController _busRegController = TextEditingController();
   final TextEditingController _routeController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  bool _obscurePassword = true;
 
   // Create Firebase Collection for drivers
   final drivers = FirebaseFirestore.instance.collection('drivers');
@@ -121,258 +122,572 @@ class _DriverSignupState extends State<DriverSignup> {
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
+    final height = MediaQuery.of(context).size.height;
 
     return SafeArea(
       child: Scaffold(
-        backgroundColor: AppColors.green,
-        body: Column(
+        backgroundColor: Colors.white,
+        body: Stack(
           children: [
-            // Header Section
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-              width: double.infinity,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.arrow_back),
-                    color: Colors.white,
-                    onPressed: () => Navigator.pop(context),
+            // Background decorative elements
+            Positioned(
+              top: -height * 0.15,
+              right: -width * 0.2,
+              child: Container(
+                width: width * 0.8,
+                height: width * 0.8,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      AppColors.green.withOpacity(0.15),
+                      AppColors.green.withOpacity(0.05),
+                    ],
+                    begin: Alignment.topRight,
+                    end: Alignment.bottomLeft,
                   ),
-                  const Text(
-                    'Driver Sign Up',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(width: 48),
-                ],
+                  shape: BoxShape.circle,
+                ),
               ),
             ),
 
-            // Form Section
-            Expanded(
+            Positioned(
+              bottom: -height * 0.1,
+              left: -width * 0.3,
               child: Container(
-                width: width,
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(30),
-                    topRight: Radius.circular(30),
+                width: width * 0.9,
+                height: width * 0.9,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Color(0xFFE1BEE7).withOpacity(0.1),
+                      Color(0xFFF8BBD9).withOpacity(0.05),
+                    ],
+                    begin: Alignment.bottomLeft,
+                    end: Alignment.topRight,
                   ),
+                  shape: BoxShape.circle,
                 ),
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(25.0),
-                  child: Form(
-                    key: _formKey,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const SizedBox(height: 20),
-                        const Text(
-                          'Create Driver Account',
-                          style: TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        const Text(
-                          'Sign up as a bus driver',
-                          style: TextStyle(fontSize: 16, color: Colors.grey),
-                        ),
-                        const SizedBox(height: 30),
+              ),
+            ),
 
-                        // Full Name Field
-                        TextFormField(
-                          controller: _nameController,
-                          decoration: InputDecoration(
-                            labelText: 'Full Name',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            prefixIcon: const Icon(Icons.person),
-                            contentPadding: const EdgeInsets.symmetric(
-                              vertical: 15,
-                              horizontal: 15,
-                            ),
-                          ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter your full name';
-                            }
-                            if (value.length < 3) {
-                              return 'Name must be at least 3 characters';
-                            }
-                            return null;
-                          },
+            Column(
+              children: [
+                // Enhanced Header Section
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 16,
+                  ),
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [AppColors.green, Color(0xFF1E8449)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.only(
+                      bottomLeft: Radius.circular(30),
+                      bottomRight: Radius.circular(30),
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.green.withOpacity(0.3),
+                        blurRadius: 15,
+                        offset: Offset(0, 5),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(12),
                         ),
-                        const SizedBox(height: 20),
-
-                        // Phone Number Field
-                        TextFormField(
-                          controller: _phoneController,
-                          keyboardType: TextInputType.phone,
-                          decoration: InputDecoration(
-                            labelText: 'Phone Number',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            prefixIcon: const Icon(Icons.phone),
-                            contentPadding: const EdgeInsets.symmetric(
-                              vertical: 15,
-                              horizontal: 15,
-                            ),
-                            hintText: '03XXXXXXXXX',
-                          ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter your phone number';
-                            }
-                            if (!phoneRegExp.hasMatch(value)) {
-                              return 'Please enter a valid Pakistani phone number (03XXXXXXXXX)';
-                            }
-                            return null;
-                          },
+                        child: IconButton(
+                          icon: const Icon(Icons.arrow_back_rounded, size: 24),
+                          color: Colors.white,
+                          onPressed: () => Navigator.pop(context),
                         ),
-                        const SizedBox(height: 20),
-
-                        TextFormField(
-                          controller: _busRegController,
-                          decoration: InputDecoration(
-                            labelText: 'Bus Registration Number',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            prefixIcon: const Icon(Icons.directions_bus),
-                            contentPadding: const EdgeInsets.symmetric(
-                              vertical: 15,
-                              horizontal: 15,
-                            ),
-                            hintText: 'JB-4600',
-                          ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter bus registration number';
-                            }
-                            if (!busRegExp.hasMatch(value)) {
-                              return 'Format must be JB-46XX (e.g., JB-4600, JB-4615)';
-                            }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 20),
-
-                        // Route Field
-                        TextFormField(
-                          controller: _routeController,
-                          decoration: InputDecoration(
-                            labelText: 'Route',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            prefixIcon: const Icon(Icons.route),
-                            contentPadding: const EdgeInsets.symmetric(
-                              vertical: 15,
-                              horizontal: 15,
-                            ),
-                            hintText: 'R1, R2, R3, etc.',
-                          ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter your route';
-                            }
-                            if (!routeRegExp.hasMatch(value)) {
-                              return 'Format must be R followed by numbers (e.g., R1)';
-                            }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 20),
-
-                        // Password Field
-                        TextFormField(
-                          controller: _passwordController,
-                          obscureText: true,
-                          decoration: InputDecoration(
-                            labelText: 'Password',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            prefixIcon: const Icon(Icons.lock),
-                            contentPadding: const EdgeInsets.symmetric(
-                              vertical: 15,
-                              horizontal: 15,
-                            ),
-                          ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter a password';
-                            }
-                            if (value.length < 6) {
-                              return 'Password must be at least 6 characters';
-                            }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 30),
-
-                        // Sign Up Button
-                        SizedBox(
-                          width: double.infinity,
-                          height: 50,
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.green,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Driver Registration',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 24,
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: -0.5,
                               ),
                             ),
-                            onPressed: regDriver,
-                            child: Center(
-                              child: loader
-                                  ? const CircularProgressIndicator(
-                                      color: Colors.white,
-                                    )
-                                  : const Text(
-                                      'Sign Up as Driver',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 18,
-                                      ),
-                                    ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 30),
-
-                        // Login redirect
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Text('Already have a driver account?'),
-                            TextButton(
-                              onPressed: () {
-                                Navigator.pushNamed(context, '/driver-login');
-                              },
-                              child: Text(
-                                'Driver Login',
-                                style: TextStyle(
-                                  color: AppColors.green,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Join as a bus driver',
+                              style: TextStyle(
+                                color: Colors.white.withOpacity(0.9),
+                                fontSize: 14,
+                                fontWeight: FontWeight.w400,
                               ),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 20),
-                      ],
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Form Section
+                Expanded(
+                  child: Container(
+                    width: width,
+                    color: Colors.white,
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.all(32.0),
+                      child: Form(
+                        key: _formKey,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const SizedBox(height: 10),
+
+                            // Welcome Text
+                            Text(
+                              'Welcome Driver!',
+                              style: TextStyle(
+                                fontSize: 28,
+                                fontWeight: FontWeight.w800,
+                                color: AppColors.green,
+                                letterSpacing: -0.8,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Create your driver account to get started',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.grey[700],
+                                fontWeight: FontWeight.w400,
+                                height: 1.4,
+                              ),
+                            ),
+                            const SizedBox(height: 40),
+
+                            // Full Name Field
+                            Text(
+                              'Full Name',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.grey[800],
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            TextFormField(
+                              controller: _nameController,
+                              style: TextStyle(fontSize: 16),
+                              decoration: InputDecoration(
+                                hintText: 'Enter your full name',
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(
+                                    color: Colors.grey[300]!,
+                                  ),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(
+                                    color: AppColors.green,
+                                    width: 2,
+                                  ),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(
+                                    color: Colors.grey[300]!,
+                                  ),
+                                ),
+                                prefixIcon: Icon(
+                                  Icons.person_outline_rounded,
+                                  color: Colors.grey[600],
+                                ),
+                                contentPadding: const EdgeInsets.symmetric(
+                                  vertical: 16,
+                                  horizontal: 16,
+                                ),
+                              ),
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please enter your full name';
+                                }
+                                if (value.length < 3) {
+                                  return 'Name must be at least 3 characters';
+                                }
+                                return null;
+                              },
+                            ),
+                            const SizedBox(height: 24),
+
+                            // Phone Number Field
+                            Text(
+                              'Phone Number',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.grey[800],
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            TextFormField(
+                              controller: _phoneController,
+                              keyboardType: TextInputType.phone,
+                              style: TextStyle(fontSize: 16),
+                              decoration: InputDecoration(
+                                hintText: '03XXXXXXXXX',
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(
+                                    color: Colors.grey[300]!,
+                                  ),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(
+                                    color: AppColors.green,
+                                    width: 2,
+                                  ),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(
+                                    color: Colors.grey[300]!,
+                                  ),
+                                ),
+                                prefixIcon: Icon(
+                                  Icons.phone_iphone_rounded,
+                                  color: Colors.grey[600],
+                                ),
+                                contentPadding: const EdgeInsets.symmetric(
+                                  vertical: 16,
+                                  horizontal: 16,
+                                ),
+                              ),
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please enter your phone number';
+                                }
+                                if (!phoneRegExp.hasMatch(value)) {
+                                  return 'Please enter a valid Pakistani phone number (03XXXXXXXXX)';
+                                }
+                                return null;
+                              },
+                            ),
+                            const SizedBox(height: 24),
+
+                            // Bus Registration Number Field
+                            Text(
+                              'Bus Registration Number',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.grey[800],
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            TextFormField(
+                              controller: _busRegController,
+                              style: TextStyle(fontSize: 16),
+                              decoration: InputDecoration(
+                                hintText: 'JB-4600',
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(
+                                    color: Colors.grey[300]!,
+                                  ),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(
+                                    color: AppColors.green,
+                                    width: 2,
+                                  ),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(
+                                    color: Colors.grey[300]!,
+                                  ),
+                                ),
+                                prefixIcon: Icon(
+                                  Icons.directions_bus_rounded,
+                                  color: Colors.grey[600],
+                                ),
+                                contentPadding: const EdgeInsets.symmetric(
+                                  vertical: 16,
+                                  horizontal: 16,
+                                ),
+                              ),
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please enter bus registration number';
+                                }
+                                if (!busRegExp.hasMatch(value)) {
+                                  return 'Format must be JB-46XX (e.g., JB-4600, JB-4615)';
+                                }
+                                return null;
+                              },
+                            ),
+                            const SizedBox(height: 24),
+
+                            // Route Field
+                            Text(
+                              'Route',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.grey[800],
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            TextFormField(
+                              controller: _routeController,
+                              style: TextStyle(fontSize: 16),
+                              decoration: InputDecoration(
+                                hintText: 'R1, R2, R3, etc.',
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(
+                                    color: Colors.grey[300]!,
+                                  ),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(
+                                    color: AppColors.green,
+                                    width: 2,
+                                  ),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(
+                                    color: Colors.grey[300]!,
+                                  ),
+                                ),
+                                prefixIcon: Icon(
+                                  Icons.route_rounded,
+                                  color: Colors.grey[600],
+                                ),
+                                contentPadding: const EdgeInsets.symmetric(
+                                  vertical: 16,
+                                  horizontal: 16,
+                                ),
+                              ),
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please enter your route';
+                                }
+                                if (!routeRegExp.hasMatch(value)) {
+                                  return 'Format must be R followed by numbers (e.g., R1)';
+                                }
+                                return null;
+                              },
+                            ),
+                            const SizedBox(height: 24),
+
+                            // Password Field
+                            Text(
+                              'Password',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.grey[800],
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            TextFormField(
+                              controller: _passwordController,
+                              obscureText: _obscurePassword,
+                              style: TextStyle(fontSize: 16),
+                              decoration: InputDecoration(
+                                hintText: 'Create a strong password',
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(
+                                    color: Colors.grey[300]!,
+                                  ),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(
+                                    color: AppColors.green,
+                                    width: 2,
+                                  ),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(
+                                    color: Colors.grey[300]!,
+                                  ),
+                                ),
+                                prefixIcon: Icon(
+                                  Icons.lock_outline_rounded,
+                                  color: Colors.grey[600],
+                                ),
+                                suffixIcon: IconButton(
+                                  icon: Icon(
+                                    _obscurePassword
+                                        ? Icons.visibility_off
+                                        : Icons.visibility,
+                                    color: Colors.grey[600],
+                                  ),
+                                  onPressed: () {
+                                    setState(() {
+                                      _obscurePassword = !_obscurePassword;
+                                    });
+                                  },
+                                ),
+                                contentPadding: const EdgeInsets.symmetric(
+                                  vertical: 16,
+                                  horizontal: 16,
+                                ),
+                              ),
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please enter a password';
+                                }
+                                if (value.length < 6) {
+                                  return 'Password must be at least 6 characters';
+                                }
+                                return null;
+                              },
+                            ),
+                            const SizedBox(height: 40),
+
+                            // Sign Up Button
+                            Container(
+                              width: double.infinity,
+                              height: 56,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(16),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: AppColors.green.withOpacity(0.3),
+                                    blurRadius: 15,
+                                    offset: Offset(0, 8),
+                                  ),
+                                ],
+                              ),
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppColors.green,
+                                  foregroundColor: Colors.white,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                  elevation: 0,
+                                ),
+                                onPressed: regDriver,
+                                child: loader
+                                    ? SizedBox(
+                                        width: 20,
+                                        height: 20,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          color: Colors.white,
+                                        ),
+                                      )
+                                    : Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Icon(
+                                            Icons.directions_bus_rounded,
+                                            size: 24,
+                                          ),
+                                          SizedBox(width: 12),
+                                          Text(
+                                            'Register as Driver',
+                                            style: TextStyle(
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.w600,
+                                              letterSpacing: 0.3,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                              ),
+                            ),
+                            const SizedBox(height: 32),
+
+                            // Divider
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Divider(color: Colors.grey[300]),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                  ),
+                                  child: Text(
+                                    'Already a driver?',
+                                    style: TextStyle(
+                                      color: Colors.grey[600],
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ),
+                                Expanded(
+                                  child: Divider(color: Colors.grey[300]),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 24),
+
+                            // Login Button
+                            Container(
+                              width: double.infinity,
+                              height: 56,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                  color: AppColors.green,
+                                  width: 2,
+                                ),
+                              ),
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.white,
+                                  foregroundColor: AppColors.green,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                  elevation: 0,
+                                ),
+                                onPressed: () {
+                                  Navigator.pushNamed(context, '/driver-login');
+                                },
+                                child: Text(
+                                  'Driver Login',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                    letterSpacing: 0.3,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 20),
+                          ],
+                        ),
+                      ),
                     ),
                   ),
                 ),
-              ),
+              ],
             ),
           ],
         ),

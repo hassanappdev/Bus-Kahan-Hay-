@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'package:bus_kahan_hay/core/app_colors.dart';
 import 'package:bus_kahan_hay/model/bus_routes.dart';
-import 'package:bus_kahan_hay/screens/drawer/custom_drawer.dart';
-import 'package:bus_kahan_hay/screens/drawer/view_routes_screen.dart';
-import 'package:bus_kahan_hay/screens/home/route_guide.dart';
+import 'package:bus_kahan_hay/screens/user/drawer/custom_drawer.dart';
+import 'package:bus_kahan_hay/screens/user/drawer/view_routes_screen.dart';
+import 'package:bus_kahan_hay/screens/user/home/route_guide.dart';
 import 'package:bus_kahan_hay/screens/available_buses.dart';
 import 'package:bus_kahan_hay/services/kml_parser.dart';
 import 'package:flutter/material.dart';
@@ -223,7 +223,10 @@ class _RouteHomeState extends State<RouteHome> {
           child: Stack(
             children: [
               SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 24,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -247,7 +250,7 @@ class _RouteHomeState extends State<RouteHome> {
                       ),
                     ),
                     const SizedBox(height: 40),
-      
+
                     // Input Card
                     Card(
                       elevation: 6,
@@ -316,7 +319,9 @@ class _RouteHomeState extends State<RouteHome> {
                                         icon: Icon(
                                           Icons.clear,
                                           size: 20,
-                                          color: AppColors.black.withOpacity(0.6),
+                                          color: AppColors.black.withOpacity(
+                                            0.6,
+                                          ),
                                         ),
                                         onPressed: () {
                                           _currentLocationController.clear();
@@ -343,16 +348,16 @@ class _RouteHomeState extends State<RouteHome> {
                                 ),
                               ),
                             ),
-      
+
                             if (_showCurrentLocationSuggestions &&
                                 _currentLocationSuggestions.isNotEmpty)
                               _buildSuggestionsList(
                                 _currentLocationSuggestions,
                                 true,
                               ),
-      
+
                             const SizedBox(height: 20),
-      
+
                             // Destination Input
                             TextField(
                               controller: _destinationController,
@@ -393,12 +398,15 @@ class _RouteHomeState extends State<RouteHome> {
                                   color: AppColors.green,
                                   size: 24,
                                 ),
-                                suffixIcon: _destinationController.text.isNotEmpty
+                                suffixIcon:
+                                    _destinationController.text.isNotEmpty
                                     ? IconButton(
                                         icon: Icon(
                                           Icons.clear,
                                           size: 20,
-                                          color: AppColors.black.withOpacity(0.6),
+                                          color: AppColors.black.withOpacity(
+                                            0.6,
+                                          ),
                                         ),
                                         onPressed: () {
                                           _destinationController.clear();
@@ -414,16 +422,16 @@ class _RouteHomeState extends State<RouteHome> {
                                 ),
                               ),
                             ),
-      
+
                             if (_showDestinationSuggestions &&
                                 _destinationSuggestions.isNotEmpty)
                               _buildSuggestionsList(
                                 _destinationSuggestions,
                                 false,
                               ),
-      
+
                             const SizedBox(height: 32),
-      
+
                             // Find Route Button
                             SizedBox(
                               width: double.infinity,
@@ -435,7 +443,9 @@ class _RouteHomeState extends State<RouteHome> {
                                         if (_currentLocationController
                                                 .text
                                                 .isEmpty ||
-                                            _destinationController.text.isEmpty) {
+                                            _destinationController
+                                                .text
+                                                .isEmpty) {
                                           ScaffoldMessenger.of(
                                             context,
                                           ).showSnackBar(
@@ -448,9 +458,9 @@ class _RouteHomeState extends State<RouteHome> {
                                           );
                                           return;
                                         }
-      
+
                                         setState(() => _isLoading = true);
-      
+
                                         try {
                                           final startPlacemarks =
                                               await locationFromAddress(
@@ -460,22 +470,26 @@ class _RouteHomeState extends State<RouteHome> {
                                               await locationFromAddress(
                                                 _destinationController.text,
                                               );
-      
+
                                           if (startPlacemarks.isEmpty ||
                                               endPlacemarks.isEmpty) {
                                             throw Exception(
                                               'Could not find locations',
                                             );
                                           }
-      
+
                                           // Use the simple version first for testing
                                           Navigator.push(
                                             context,
                                             MaterialPageRoute(
                                               builder: (context) => RouteGuide(
                                                 startLocation: LatLng(
-                                                  startPlacemarks.first.latitude,
-                                                  startPlacemarks.first.longitude,
+                                                  startPlacemarks
+                                                      .first
+                                                      .latitude,
+                                                  startPlacemarks
+                                                      .first
+                                                      .longitude,
                                                 ),
                                                 endLocation: LatLng(
                                                   endPlacemarks.first.latitude,
@@ -523,9 +537,9 @@ class _RouteHomeState extends State<RouteHome> {
                                 child: const Text('Find Bus Route'),
                               ),
                             ),
-      
+
                             const SizedBox(height: 16),
-      
+
                             // Additional Info Text
                             Text(
                               'We\'ll find the most efficient bus routes for your journey',
@@ -539,9 +553,9 @@ class _RouteHomeState extends State<RouteHome> {
                         ),
                       ),
                     ),
-      
+
                     const SizedBox(height: 32),
-      
+
                     // Quick Actions Section
                     Text(
                       'Quick Actions',
@@ -589,13 +603,15 @@ class _RouteHomeState extends State<RouteHome> {
                   ],
                 ),
               ),
-      
+
               if (_isLoading)
                 Container(
                   color: Colors.black.withOpacity(0.4),
                   child: Center(
                     child: CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(AppColors.green),
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        AppColors.green,
+                      ),
                       strokeWidth: 3,
                     ),
                   ),

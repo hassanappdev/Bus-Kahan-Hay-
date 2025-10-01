@@ -1,23 +1,21 @@
-import 'package:bus_kahan_hay/screens/authentication/auth.dart';
-import 'package:bus_kahan_hay/screens/authentication/forgot_password.dart';
-import 'package:bus_kahan_hay/screens/authentication/login.dart';
-import 'package:bus_kahan_hay/screens/authentication/select_profile_picture_screen.dart';
-import 'package:bus_kahan_hay/screens/authentication/signup.dart';
-import 'package:bus_kahan_hay/screens/drawer/guide_screen.dart';
-import 'package:bus_kahan_hay/screens/drawer/help_screen.dart';
-import 'package:bus_kahan_hay/screens/drawer/profile_section.dart';
-import 'package:bus_kahan_hay/screens/drawer/view_routes_screen.dart';
+import 'package:bus_kahan_hay/screens/user/authentication/auth.dart';
+import 'package:bus_kahan_hay/screens/user/authentication/forgot_password.dart';
+import 'package:bus_kahan_hay/screens/user/authentication/login.dart';
+import 'package:bus_kahan_hay/screens/user/authentication/select_profile_picture_screen.dart';
+import 'package:bus_kahan_hay/screens/user/authentication/signup.dart';
+import 'package:bus_kahan_hay/screens/user/drawer/guide_screen.dart';
+import 'package:bus_kahan_hay/screens/user/drawer/help_screen.dart';
+import 'package:bus_kahan_hay/screens/user/drawer/profile_section.dart';
+import 'package:bus_kahan_hay/screens/user/drawer/view_routes_screen.dart';
 import 'package:bus_kahan_hay/screens/driver/driver_home.dart';
 import 'package:bus_kahan_hay/screens/driver/driver_login.dart';
 import 'package:bus_kahan_hay/screens/driver/driver_signup.dart';
-import 'package:bus_kahan_hay/screens/home/route_home.dart';
-import 'package:bus_kahan_hay/screens/onBoardingFluid/fluid_home.dart';
-import 'package:bus_kahan_hay/screens/splash/splash.dart';
-import 'package:bus_kahan_hay/screens/available_buses.dart';
+import 'package:bus_kahan_hay/screens/user/home/route_home.dart';
+import 'package:bus_kahan_hay/screens/user/onBoardingFluid/fluid_home.dart';
+import 'package:bus_kahan_hay/screens/user/splash/splash.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
-
 import 'package:flutter/foundation.dart';
 
 void main() async {
@@ -48,7 +46,9 @@ class App extends StatelessWidget {
 
       // home: const FluidHome(),
       // home: const RouteHome(),
-      home: const SplashScreen(),
+      // home: const SplashScreen(),
+      home: const Auth(),
+
       routes: {
         '/driver-signup': (context) => const DriverSignup(),
         '/driver-login': (context) => const DriverLogin(),

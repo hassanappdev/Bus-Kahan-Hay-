@@ -282,11 +282,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
     await DriverLocalData.clearDriverData();
     await _auth.signOut();
 
-    Navigator.pushNamedAndRemoveUntil(
-      context,
-      '/driver-login',
-      (route) => false,
-    );
+    Navigator.pushNamedAndRemoveUntil(context, '/auth', (route) => false);
   }
 
   void _showErrorDialog(String message) {
@@ -316,185 +312,386 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: AppColors.green,
-        title: const Text('Driver Dashboard'),
-        actions: [
-          IconButton(icon: const Icon(Icons.logout), onPressed: _logoutDriver),
-        ],
-      ),
+      backgroundColor: Colors.white,
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? Center(child: CircularProgressIndicator(color: AppColors.green))
           : Column(
               children: [
-                // Driver Info Card
-                _buildDriverInfoCard(),
-                const SizedBox(height: 8),
-
-                // Control Buttons
-                _buildControlButtons(),
-                const SizedBox(height: 8),
-
-                // Map Section
-                Expanded(child: _buildMapSection()),
-              ],
-            ),
-    );
-  }
-
-  Widget _buildDriverInfoCard() {
-    return Card(
-      margin: const EdgeInsets.all(8),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  _driverName,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+                // Enhanced Header Section
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 16,
                   ),
-                ),
-                const SizedBox(height: 4),
-                Text('Bus: $_busRegNumber'),
-                Text('Route: $_route'),
-              ],
-            ),
-            Column(
-              children: [
-                const Text('Current Speed'),
-                Text(
-                  '${_currentSpeed.toStringAsFixed(1)} km/h',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: _currentSpeed > 0 ? Colors.green : Colors.grey,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [AppColors.green, Color(0xFF1E8449)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.green.withOpacity(0.3),
+                        blurRadius: 15,
+                        offset: Offset(0, 5),
+                      ),
+                    ],
                   ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildControlButtons() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8),
-      child: Row(
-        children: [
-          Expanded(
-            child: ElevatedButton.icon(
-              icon: Icon(_isTracking ? Icons.stop : Icons.play_arrow),
-              label: Text(_isTracking ? 'Stop Tracking' : 'Start Tracking'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: _isTracking ? Colors.red : AppColors.green,
-                foregroundColor: Colors.white,
-              ),
-              onPressed: () {
-                if (_isTracking) {
-                  _stopLocationTracking();
-                } else {
-                  _startLocationTracking();
-                }
-              },
-            ),
-          ),
-          const SizedBox(width: 8),
-          IconButton(
-            icon: const Icon(Icons.my_location),
-            onPressed: _getCurrentLocation,
-            style: IconButton.styleFrom(
-              backgroundColor: AppColors.green,
-              foregroundColor: Colors.white,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMapSection() {
-    return Stack(
-      children: [
-        GoogleMap(
-          onMapCreated: (controller) {
-            setState(() {
-              _mapController = controller;
-            });
-          },
-          initialCameraPosition: CameraPosition(
-            target: _currentPosition != null
-                ? LatLng(
-                    _currentPosition!.latitude,
-                    _currentPosition!.longitude,
-                  )
-                : const LatLng(33.6844, 73.0479), // Default to Islamabad
-            zoom: 14,
-          ),
-          markers: _markers,
-          polylines: _polylines,
-          myLocationEnabled: true,
-          myLocationButtonEnabled: false,
-          compassEnabled: true,
-          zoomControlsEnabled: false,
-        ),
-
-        // Current location button
-        Positioned(
-          bottom: 16,
-          right: 16,
-          child: FloatingActionButton.small(
-            onPressed: _getCurrentLocation,
-            child: const Icon(Icons.my_location),
-          ),
-        ),
-
-        // Loading overlay when tracking
-        if (_isTracking)
-          Positioned(
-            top: 16,
-            left: 16,
-            child: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.red.withOpacity(0.8),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Row(
-                children: [
-                  Icon(Icons.location_on, color: Colors.white, size: 16),
-                  SizedBox(width: 4),
-                  Text(
-                    'LIVE TRACKING',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12,
+                  child: SafeArea(
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Driver Dashboard',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.w700,
+                                  letterSpacing: -0.5,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'Welcome back, $_driverName',
+                                style: TextStyle(
+                                  color: Colors.white.withOpacity(0.9),
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w400,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: IconButton(
+                            icon: const Icon(Icons.logout_rounded, size: 24),
+                            color: Colors.white,
+                            onPressed: _logoutDriver,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                ],
-              ),
-            ),
-          ),
+                ),
 
-        // Settings button for permission issues
-        if (_currentPosition == null)
-          Positioned(
-            top: 16,
-            right: 16,
-            child: FloatingActionButton.small(
-              onPressed: _openAppSettings,
-              child: const Icon(Icons.settings),
+                // Driver Info Card
+                Container(
+                  margin: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 10,
+                        offset: Offset(0, 4),
+                      ),
+                    ],
+                    border: Border.all(color: Colors.grey.withOpacity(0.2)),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.person_rounded,
+                                color: AppColors.green,
+                                size: 16,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                _driverName,
+                                style: const TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.directions_bus_rounded,
+                                color: Colors.grey[600],
+                                size: 14,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Bus: $_busRegNumber',
+                                style: TextStyle(
+                                  color: Colors.grey[700],
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 4),
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.route_rounded,
+                                color: Colors.grey[600],
+                                size: 14,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Route: $_route',
+                                style: TextStyle(
+                                  color: Colors.grey[700],
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [AppColors.green, Color(0xFF1E8449)],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Column(
+                          children: [
+                            Text(
+                              '${_currentSpeed.toStringAsFixed(1)}',
+                              style: const TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.white,
+                              ),
+                            ),
+                            const Text(
+                              'km/h',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.white,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Control Buttons
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Container(
+                          height: 56,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(16),
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppColors.green.withOpacity(0.3),
+                                blurRadius: 15,
+                                offset: Offset(0, 8),
+                              ),
+                            ],
+                          ),
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: _isTracking
+                                  ? Colors.red
+                                  : AppColors.green,
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              elevation: 0,
+                            ),
+                            onPressed: () {
+                              if (_isTracking) {
+                                _stopLocationTracking();
+                              } else {
+                                _startLocationTracking();
+                              }
+                            },
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  _isTracking
+                                      ? Icons.stop_rounded
+                                      : Icons.play_arrow_rounded,
+                                  size: 24,
+                                ),
+                                const SizedBox(width: 12),
+                                Text(
+                                  _isTracking
+                                      ? 'Stop Tracking'
+                                      : 'Start Tracking',
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                    letterSpacing: 0.3,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Container(
+                        height: 56,
+                        width: 56,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 10,
+                              offset: Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            foregroundColor: AppColors.green,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            elevation: 0,
+                          ),
+                          onPressed: _getCurrentLocation,
+                          child: const Icon(Icons.my_location_rounded),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // Map Section
+                Expanded(
+                  child: Stack(
+                    children: [
+                      GoogleMap(
+                        onMapCreated: (controller) {
+                          setState(() {
+                            _mapController = controller;
+                          });
+                        },
+                        initialCameraPosition: CameraPosition(
+                          target: _currentPosition != null
+                              ? LatLng(
+                                  _currentPosition!.latitude,
+                                  _currentPosition!.longitude,
+                                )
+                              : const LatLng(
+                                  33.6844,
+                                  73.0479,
+                                ), // Default to Islamabad
+                          zoom: 14,
+                        ),
+                        markers: _markers,
+                        polylines: _polylines,
+                        myLocationEnabled: true,
+                        myLocationButtonEnabled: false,
+                        compassEnabled: true,
+                        zoomControlsEnabled: false,
+                      ),
+
+                      // Current location button
+                      Positioned(
+                        bottom: 16,
+                        right: 16,
+                        child: FloatingActionButton(
+                          onPressed: _getCurrentLocation,
+                          backgroundColor: Colors.white,
+                          foregroundColor: AppColors.green,
+                          child: const Icon(Icons.my_location_rounded),
+                        ),
+                      ),
+
+                      // Live tracking indicator
+                      if (_isTracking)
+                        Positioned(
+                          top: 16,
+                          left: 16,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 8,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.red.withOpacity(0.9),
+                              borderRadius: BorderRadius.circular(20),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.red.withOpacity(0.3),
+                                  blurRadius: 10,
+                                  offset: Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.location_on_rounded,
+                                  color: Colors.white,
+                                  size: 16,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'LIVE TRACKING',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 12,
+                                    letterSpacing: 0.5,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+
+                      // Settings button for permission issues
+                      if (_currentPosition == null)
+                        Positioned(
+                          top: 16,
+                          right: 16,
+                          child: FloatingActionButton(
+                            onPressed: _openAppSettings,
+                            backgroundColor: Colors.white,
+                            foregroundColor: AppColors.green,
+                            child: const Icon(Icons.settings_rounded),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-          ),
-      ],
     );
   }
 }

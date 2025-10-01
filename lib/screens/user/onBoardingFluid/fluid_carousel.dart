@@ -1,5 +1,5 @@
-import 'package:bus_kahan_hay/screens/onBoardingFluid/fluid_clipper.dart';
-import 'package:bus_kahan_hay/screens/onBoardingFluid/fluid_edge.dart';
+import 'package:bus_kahan_hay/screens/user/onBoardingFluid/fluid_clipper.dart';
+import 'package:bus_kahan_hay/screens/user/onBoardingFluid/fluid_edge.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
@@ -8,7 +8,7 @@ class FluidCarousel extends StatefulWidget {
   final VoidCallback? onLastPageReached;
 
   const FluidCarousel({
-    super.key, 
+    super.key,
     required this.children,
     this.onLastPageReached,
   });
@@ -17,7 +17,8 @@ class FluidCarousel extends StatefulWidget {
   FluidCarouselState createState() => FluidCarouselState();
 }
 
-class FluidCarouselState extends State<FluidCarousel> with SingleTickerProviderStateMixin {
+class FluidCarouselState extends State<FluidCarousel>
+    with SingleTickerProviderStateMixin {
   int _index = 0;
   int? _dragIndex;
   Offset _dragOffset = Offset.zero;
@@ -69,7 +70,7 @@ class FluidCarouselState extends State<FluidCarousel> with SingleTickerProviderS
             ],
           ),
         ),
-        
+
         // Current page indicator at top
         Positioned(
           top: 30,
@@ -84,9 +85,9 @@ class FluidCarouselState extends State<FluidCarousel> with SingleTickerProviderS
                 margin: const EdgeInsets.symmetric(horizontal: 4),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: _index == dotIndex 
-                    ? Colors.white.withOpacity(0.0)
-                        : Colors.white.withOpacity(0.0),
+                  color: _index == dotIndex
+                      ? Colors.white.withOpacity(0.0)
+                      : Colors.white.withOpacity(0.0),
                 ),
               );
             }),
@@ -104,7 +105,8 @@ class FluidCarouselState extends State<FluidCarousel> with SingleTickerProviderS
   void _handlePanDown(DragDownDetails details, Size size) {
     if (_dragIndex != null && _dragCompleted) {
       _index = _dragIndex!;
-      if (_index >= widget.children.length - 1 && widget.onLastPageReached != null) {
+      if (_index >= widget.children.length - 1 &&
+          widget.onLastPageReached != null) {
         widget.onLastPageReached!();
       }
     }
@@ -141,7 +143,9 @@ class FluidCarouselState extends State<FluidCarousel> with SingleTickerProviderS
     if (_dragDirection == 0.0) return false;
     if (_dragCompleted) return true;
 
-    double availW = _dragDirection == 1 ? width - _dragOffset.dx : _dragOffset.dx;
+    double availW = _dragDirection == 1
+        ? width - _dragOffset.dx
+        : _dragOffset.dx;
     double ratio = dx * _dragDirection / availW;
 
     if (ratio > 0.8 && availW / width > 0.5) {
@@ -157,5 +161,3 @@ class FluidCarouselState extends State<FluidCarousel> with SingleTickerProviderS
     edge.applyTouchOffset();
   }
 }
-
-
